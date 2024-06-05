@@ -21,7 +21,6 @@ export const listRole =(props)=>(
     </Datagrid>
     </List>
 );
-
 export const editRole=(props)=>(
     <Edit{...props}>
     <SimpleForm>
@@ -29,7 +28,6 @@ export const editRole=(props)=>(
     </SimpleForm>
     </Edit>
 );
-
 export const createRole=(props)=>(
     <Create{...props}>
     <SimpleForm>

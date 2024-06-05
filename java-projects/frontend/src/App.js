@@ -6,10 +6,12 @@ import "./assets/sass/app.scss";
 import Main from './Component/layouts/Main';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 function App() {
+  let cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+  let cartItemCount=cartItems.length
   return (
   <div>
         <GoogleOAuthProvider clientId="1073053158219-rs06gcjsl57ff6p8bhiea87ko80t6fka.apps.googleusercontent.com">
-    <Header/>
+    <Header cartItemCount={cartItemCount}/>
     <Main/>
     <Footer/>
     </GoogleOAuthProvider>

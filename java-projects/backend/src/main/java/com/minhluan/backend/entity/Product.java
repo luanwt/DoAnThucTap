@@ -41,4 +41,8 @@ public class Product {
     @JsonIgnore
     @OneToMany(mappedBy = "product", cascade = CascadeType.REMOVE)
     private List<OrderDetail> orderdetail;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "product", cascade = CascadeType.REMOVE)
+    private List<FeedBack> feedbacks;
 }

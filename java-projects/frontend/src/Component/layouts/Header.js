@@ -70,7 +70,7 @@ window.addEventListener("load", () => {
 	</div>
 });	
 
-function Header() {
+function Header({cartItemCount}) {
 	/////////////////////
 	const [searchQuery, setSearchQuery] = useState('');
 	const [searchResults, setSearchResults] = useState([]);
@@ -121,8 +121,8 @@ function Header() {
 				<div class="container"  >
 					<div class="row align-items-center " >
 						<div class="col-xl-2 col-lg-3 col-md-10" >
-							<a href="http://localhost:3000/home" class="brand-wrap" >
-							<img class="logo" width="100px" src={imglogo2} alt="Brand Logo" />
+							<a href="http://localhost:3000/home"  >
+							<img class="logo" height="100px" width="120px" style={{borderRadius:30}} src={imglogo2} alt="Brand Logo" />
 							</a>
 							
 						</div>
@@ -146,7 +146,7 @@ function Header() {
 									<a href="#" class="widget-view">
 										<div class="icon-area">
 											<i class="fa fa-user" ></i>
-											<span class="notify" >999</span>
+											<span class="notify" ></span>
 										</div>
 										
 										<Link class="nav-link"
@@ -166,7 +166,7 @@ function Header() {
 									<a href="#" class="widget-view">
 										<div class="icon-area">
 										<i class="fas fa-comment-dots"></i>
-											<span class="notify">999</span>
+											<span class="notify"></span>
 										</div>
 										<Link class="nav-link"
 											onClick={() => {
@@ -181,6 +181,7 @@ function Header() {
 								<div class="widget-header">
 									<a href="#" class="widget-view">
 										<div class="icon-area">
+											<span class="notify">{cartItemCount}</span>
 											<i class="fa fa-shopping-cart"></i>
 										</div>
 										<Link class="nav-link" onClick={toCart}><small class="text"> Giỏ	 hàng </small></Link>

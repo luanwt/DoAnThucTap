@@ -16,6 +16,8 @@ import com.minhluan.backend.service.CartItemService;
 
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @AllArgsConstructor
@@ -33,7 +35,20 @@ public class CartItemController {
 
     }
     // Get CartItem by id REST API
-
+    @PutMapping("/{cartId}/{productId}")
+    public ResponseEntity<CartItem> updateCartItem(
+            @PathVariable("cartId") Long cartId,
+            @PathVariable("productId") Long productId,
+            @RequestBody Map<String, Integer> update) {
+        Integer newQuality = update.get("quality");
+        if (newQuality != null) {
+            Optional<CartItem> updatedCartItem = CartItemService.updateCartItem(cartId, productId, newQuality);
+            if (updatedCartItem.isPresent()) {
+                return new ResponseEntity<>(updatedCartItem.get(), HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
     // http://localhost:8080/api/CartItems/1
 
     @GetMapping("{id}")
@@ -88,9 +103,18 @@ public class CartItemController {
     public ResponseEntity<List<CartItem>> getCartItemsByCartId(@PathVariable("cartId") Long cartId) {
         List<CartItem> cartItems = CartItemService.getCartItemsByCartId(cartId);  // Assuming findByCart exists
         if (cartItems.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);  // Handle empty cart list
+            return null;  // Handle empty cart list
         }
         // ... rest of your logic to prepare response (e.g., headers)
         return ResponseEntity.ok().body(cartItems);
+    }
+
+
+    @DeleteMapping("/{cartId}/{productId}")
+    public ResponseEntity<String> deleteCartItemByCartIdAndProductId(
+            @PathVariable("cartId") Long cartId,
+            @PathVariable("productId") Long productId) {
+        CartItemService.deleteCartItemByCartIdAndProductId(cartId, productId);
+        return new ResponseEntity<>("CartItem successfully deleted!", HttpStatus.OK);
     }
 }

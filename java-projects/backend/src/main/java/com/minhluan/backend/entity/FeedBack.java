@@ -18,13 +18,15 @@ public class FeedBack {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String firstname;
-    private String lastname;
+    private String fullname;
     private String email;
     private String phone_number;
-    private String subject_name;
+    private String content;
     private String note;
     private int status;
     private Date created_at;
     private Date update_at;
+
+    @ManyToOne
+    private Product product;
 }

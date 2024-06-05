@@ -3,7 +3,7 @@
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 
-import { DELETE_ALL, POST_ADD } from "../../api/apiService";
+import { DELETE_ALL, DELETE_ID, POST_ADD } from "../../api/apiService";
 
 
 
@@ -45,73 +45,6 @@ const MenuProflie = () => {
 	}
 
 	///Update Cart to database
-	async function clearCart() {
-		DELETE_ALL(`cartItems/cart/${CartId}`)
-	}
-	const CartId = JSON.parse(localStorage.getItem('CartId')) || [];
-	let cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-	async function updateCartInDatabase2(cartItems) {
-		 cartItems.map(item => {
-			if (item.id) {
-				// Update existing item
-				const requestData = {
-					productId: item.productId,
-					name: item.name,
-					price: item.price,
-					image: item.image,
-					quality: item.quality,
-					cart: {
-						id: CartId
-					}
-				};
-				try {
-					// const response0 = await axios.delete(`/api/cartItems/cart/${CartId}`);
-					POST_ADD(`cartItems`, requestData)
-					console.log('Cart updated successfully in database.');
-				} catch (error) {
-					console.error('Error updating cart in database:', error);
-				}
-			} else {
-				// Add new item
-				const requestData = {
-					// Add new item properties
-					productId: item.productId,
-					name: item.name,
-					price: item.price,
-					image: item.image,
-					quality: item.quality,
-					cart: {
-						id: CartId
-					}
-					// ...
-				};
-				try {
-					// const response0 = await axios.delete(`/api/cartItems/cart/${CartId}`);
-					POST_ADD(`cartItems`, requestData)
-					console.log('Cart updated successfully in database.');
-				} catch (error) {
-					console.error('Error updating cart in database:', error);
-				}
-			}
-
-
-		});
-
-	}
-	async function updateCartInDatabase(cartItems) {
-		// Prepare cart update data
-		try {
-			await clearCart();
-			await updateCartInDatabase2(cartItems);
-		} catch (error) {
-			console.error('Yêu cầu thất bại:', error);
-		}
-
-
-		// 4. Send API request to update cart:
-
-	}
-	/// End Update Cart to database
 	return (
 		<>
 			<nav class="list-group">
@@ -125,11 +58,10 @@ const MenuProflie = () => {
 					e.preventDefault();
 					handleLogout();
 					localStorage.removeItem("Account");
-					localStorage.removeItem("accessToken");
+					// localStorage.removeItem("accessToken");
 					localStorage.removeItem('cartItems');
-					clearCart();
-					updateCartInDatabase(cartItems);
-					window.location.href = "/login";
+					localStorage.removeItem('CartId');
+					window.location.href = "/Login";
 				}}> <a>Đăng xuất</a></Link>
 				{/* <button onClick={handleLogout}>Logout</button> */}
 

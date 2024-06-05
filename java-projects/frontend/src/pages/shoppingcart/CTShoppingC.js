@@ -4,6 +4,7 @@ import React, { useState } from "react";
 
 import { Button } from "react-bootstrap";
 import axios from "axios";
+import { DELETE_ID, GET_ID, PUT_EDIT } from "../../api/apiService";
 
 // const storedUserInfo = localStorage.getItem('Account');
 // const retrievedUserInfo = JSON.parse(storedUserInfo);
@@ -21,6 +22,7 @@ const CTShoppingC = () => {
 	const [totalPrice, settotalprice] = useState(0);
 	let login = localStorage.getItem('Login')
 	const [note, setnote] = useState("không giảm giá");
+	let cartId = JSON.parse(localStorage.getItem('CartId')) || [];
 	// useEffect(() => {
 	// 	const fetchOrders = async () => {
 	// 	  try {
@@ -30,7 +32,7 @@ const CTShoppingC = () => {
 	// 		console.error('Failed to retrieve orders:', error);
 	// 	  }
 	// 	};
-	
+
 	// 	fetchOrders();
 	//   }, []);
 
@@ -46,25 +48,22 @@ const CTShoppingC = () => {
 		console.log('Yêu cầu thành công:', response.data);
 	}
 	async function updateall(requestData) {
-		if (login !== 1) {
-			alert("Vui lòng đăng nhập để sử dụng chức năng này");
-			window.location.href = "/Login";
-		} else {
-			//update Order table
-			try {
-				await updateOrder(requestData);
-				alert('Đơn hàng 1 đã cập nhật thành công!');
-				await updateOrderdetail();
-			} catch (error) {
-				console.error('Yêu cầu thất bại:', error);
-			}
-			alert('Đã thanh toán thành công');
-			window.location.href = "/shopping-cart";
+
+		try {
+			await updateOrder(requestData);
+			alert('Đơn hàng 1 đã cập nhật thành công!');
+			await updateOrderdetail();
+			alert('chi tiet Đơn hàng đã cập nhật thành công!');
+		} catch (error) {
+			console.error('Yêu cầu thất bại:', error);
 		}
+		alert('Đã thanh toán thành công');
+		window.location.href = "/shopping-cart";
+
 	}
-		//updateOrderDetail when buy all Item
+	//updateOrderDetail when buy all Item
+	let cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
 	async function updateOrderdetail() {
-		let cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
 		const response = await axios.get('http://localhost:8080/api/orders');
 		if (cartItems != null) {
 			cartItems.forEach(item => {
@@ -73,7 +72,6 @@ const CTShoppingC = () => {
 				try {
 					a = (response.data);
 					b = parseInt(a[a.length - 1].id)
-				
 					const requestData = {
 						num: item.quality,
 						price: item.price,
@@ -85,26 +83,42 @@ const CTShoppingC = () => {
 							id: item.productId,
 						},
 					};
+					console.log(requestData)
+
 					updateOrderdetail2(requestData)
 				} catch (error) {
 					console.error('Failed to retrieve orders:', error);
 				}
 			})
-		}else{
+		} else {
 			alert("Cartitem dang null???")
 		}
 	}
 	async function updateOrderdetail2(requestData) {
+		const productId = requestData.product.id;
+		// Assuming GET_ID returns a Promise
+		const response2 = await axios.get(`http://localhost:8080/api/products/${productId}`);
+		const num = response2.data.quality - requestData.num
+		PUT_EDIT(`products/update/${requestData.product.id}`, { quality: num })
+		delcartItems2(productId)	
 		const response = await axios.post('http://localhost:8080/api/orderdetails', requestData);
 		console.log('Yêu cầu thành công:', response.data);
 	}
 	///
 
 
+	function delcartItems2(productId) {
+		DELETE_ID(`cartItems/${cartId}/${productId}`)
+		localStorage.removeItem('cartItems');
+		window.location.href = "/shopping-cart";
+	}
+
+
 	/////////////////////////////////////////////////
 	//In ra cac san pham tron Cart
 	function displayCartItems() {
 		let cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+
 		let cartContainer = document.getElementById('cart');
 		if (cartItems != null) {
 			// cartContainer.innerHTML = ''; // Clear previous content
@@ -112,7 +126,7 @@ const CTShoppingC = () => {
 				// alert(cartItems)
 				let td = document.createElement('td');
 				td.class = "itemside"
-			
+
 				// Create a div to display each item
 				let buttonBuy = document.createElement('button');
 				buttonBuy.textContent = "Thanh Toan"
@@ -126,13 +140,14 @@ const CTShoppingC = () => {
 				buttonBuy.onclick = buyOneItem
 				function delcartItems() {
 
+					DELETE_ID(`cartItems/${cartId}/${item.productId}`)
 					let temp = cartItems.filter(item => item.productId !== d);
 					localStorage.setItem("cartItems", JSON.stringify(temp))
 					window.location.href = "/shopping-cart";
 				}
 
 				async function buyOneItem() {
-					if (login !== 1) {
+					if (login != 1) {
 						alert("Vui lòng đăng nhập để sử dụng chức năng này");
 						window.location.href = "/Login";
 					} else {
@@ -144,7 +159,7 @@ const CTShoppingC = () => {
 							fullname: retrievedUserInfo.name,
 							address: retrievedUserInfo.address,
 							order_data: new Date().toISOString(),
-							note:note,
+							note: note,
 							phone_number: retrievedUserInfo.phonenumber,
 							total_money: item.price,
 							user: {
@@ -156,6 +171,7 @@ const CTShoppingC = () => {
 							await updateOrder(requestData);
 							alert('Đơn hàng 1 đã cập nhật thành công!');
 							await updateOrderdetail();
+							await delcartItems()
 						} catch (error) {
 							console.error('Yêu cầu thất bại:', error);
 						}
@@ -165,7 +181,11 @@ const CTShoppingC = () => {
 						alert('Đã thanh toán thành công');
 					}
 				}
-					//Update Order when buy 1 Item
+
+
+
+
+				//Update Order when buy 1 Item
 				async function updateOrder(requestData) {
 					const response = await axios.post('http://localhost:8080/api/orders', requestData);
 					console.log('Yêu cầu thành công:', response.data);
@@ -173,7 +193,7 @@ const CTShoppingC = () => {
 				}
 				/////
 
-					//updateOrderDetail when buy 1 Item
+				//updateOrderDetail when buy 1 Item
 				async function updateOrderdetail() {
 					var a
 					var b
@@ -193,7 +213,6 @@ const CTShoppingC = () => {
 								id: item.productId,
 							},
 						};
-				
 						updateOrderdetail1(requestData)
 						console.log(requestData)
 					} catch (error) {
@@ -203,14 +222,19 @@ const CTShoppingC = () => {
 				}
 
 				async function updateOrderdetail1(requestData) {
+					const productId = requestData.product.id;
+					// Assuming GET_ID returns a Promise
+					const response2 = await axios.get(`http://localhost:8080/api/products/${productId}`);
+					const num = response2.data.quality - requestData.num
+					PUT_EDIT(`products/update/${requestData.product.id}`, { quality: num })
 					const response = await axios.post('http://localhost:8080/api/orderdetails', requestData);
 					console.log('Yêu cầu thành công:', response.data);
 				}
 
 				////////
 				let itemDiv = document.createElement('h4');
-					itemDiv.style.color = '#FF0000'; 
-					itemDiv.textContent = `${item.name} `;
+				itemDiv.style.color = '#FF0000';
+				itemDiv.textContent = `${item.name} `;
 				let price = document.createElement('h5');
 
 				let price2 = item.quality * item.price / 1000;
@@ -288,7 +312,7 @@ const CTShoppingC = () => {
 												<span class="input-group-append">
 													<Button class='form-control'
 														onClick={() => {
-															
+
 															var x = document.getElementById("magiamgia");
 															var y = document.getElementById("giamgia");
 															var z = document.getElementById("total");
@@ -299,7 +323,6 @@ const CTShoppingC = () => {
 																y.textContent = y.value + " vnd"
 																z.value = totalPrice - y.value;
 																z.textContent = z.value + " vnd"
-															
 															}
 														}}>Xác Nhận
 													</Button>
@@ -327,32 +350,42 @@ const CTShoppingC = () => {
 									</dl>
 									<dl>
 										<Button class="dlist-align" onClick={() => {
-
-											const storedUserInfo = localStorage.getItem('Account');
-											if(storedUserInfo!==null){
-												// var z = document.getElementById("total");
-												// alert(totalPrice)
-												localStorage.removeItem('cartItems');
-												const retrievedUserInfo = JSON.parse(storedUserInfo);
-												const requestData = {
-													// Top-level data properties
-													email: retrievedUserInfo.email,
-													fullname: retrievedUserInfo.name,
-													address: retrievedUserInfo.address,
-													order_data: new Date().toISOString(),
-													note:note,
-													phone_number: retrievedUserInfo.phonenumber,
-													total_money: totalPrice,
-													user: {
-														id: retrievedUserInfo.id,
-													}
-												};
-												updateall(requestData)
+											if(cartItems.length==0){
+												alert("Giỏ hàng đang trống vui lòng thêm sản phẩm vào")
+												window.location.href = "/home";
 											}
-												else{
+											else{
+												const storedUserInfo = localStorage.getItem('Account');
+												const cartId = localStorage.getItem('CartId');
+												if (storedUserInfo !== null) {
+													// var z = document.getElementById("total");
+													// alert(totalPrice)
+	
+													const retrievedUserInfo = JSON.parse(storedUserInfo);
+													const requestData = {
+														// Top-level data properties
+														email: retrievedUserInfo.email,
+														fullname: retrievedUserInfo.name,
+														address: retrievedUserInfo.address,
+														order_data: new Date().toISOString(),
+														note: note,
+														phone_number: retrievedUserInfo.phonenumber,
+														total_money: totalPrice,
+														user: {
+															id: retrievedUserInfo.id,
+														}
+													};
+													DELETE_ID(`cart/${cartId}`)
+													updateall(requestData)
+													localStorage.removeItem('cartItems');
+	
+												}
+												else {
 													alert("Vui lòng đăng nhập để có thể thanh toán")
 													window.location.href = "/login";
 												}
+											}
+										
 										}}> Mua Hàng <i class="fa fa-chevron-right"></i> </Button>
 									</dl>
 									<hr />
@@ -364,6 +397,7 @@ const CTShoppingC = () => {
 								}}> get last order
 								</Button>
 							</div>
+							<h1>{cartItems.size}</h1>
 						</aside>
 					</div>
 

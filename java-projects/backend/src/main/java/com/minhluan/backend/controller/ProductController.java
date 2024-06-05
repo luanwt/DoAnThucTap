@@ -9,9 +9,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+
 import com.minhluan.backend.entity.Product;
 import com.minhluan.backend.service.ProductService;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @AllArgsConstructor
@@ -62,7 +66,6 @@ public class ProductController {
         }else {
             products = productService.getAllProducts(pageable);
         }
-    
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Range", String.format("items %d-%d/%d",
                 pageable.getOffset(),
@@ -98,6 +101,22 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
 
-  
+  @PutMapping("/update/{id}")
+    public ResponseEntity<Product> updateProduct(
+   
+            @PathVariable("id") Long id,
+            @RequestBody Map<String, Integer> update) {
+        Integer newQuality = update.get("quality");
+        if (newQuality != null) {
+            Optional<Product> updatedProduct = productService.updateProduct(id, newQuality);
+            if (updatedProduct.isPresent()) {
+                return new ResponseEntity<>(updatedProduct.get(), HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+
+    
 
 }

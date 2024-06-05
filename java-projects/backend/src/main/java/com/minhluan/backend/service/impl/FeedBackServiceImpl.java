@@ -35,11 +35,11 @@ public class FeedBackServiceImpl implements FeedBackService {
 @Override
       public FeedBack updateFeedback(FeedBack Feedback){
         FeedBack existingFeedback = feedbackRepository.findById(Feedback.getId()).get();
-        existingFeedback.setFirstname(Feedback.getFirstname());
-        existingFeedback.setLastname(Feedback.getLastname());
+        existingFeedback.setFullname(Feedback.getFullname());
+
         existingFeedback.setEmail(Feedback.getEmail());
         existingFeedback.setPhone_number(Feedback.getPhone_number());
-        existingFeedback.setSubject_name(Feedback.getSubject_name());
+        existingFeedback.setContent(Feedback.getContent());
         existingFeedback.setNote(Feedback.getNote());
         existingFeedback.setStatus(Feedback.getStatus());
         existingFeedback.setCreated_at(Feedback.getCreated_at());

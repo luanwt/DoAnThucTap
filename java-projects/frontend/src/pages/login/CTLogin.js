@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import '../../assets/js/bootstrap.bundle.min.js';
 import React, { useEffect, useState, MessageEvent } from "react";
-import { GET_ALL } from "../../api/apiService";
+import { GET_ALL, POST_ADD, PUT_EDIT } from "../../api/apiService";
 import { Button, Row } from 'react-bootstrap';
 import { Checkbox, FormControlLabel, FormGroup, Radio } from '@mui/material';
 import { Card, Image } from 'react-bootstrap';
@@ -38,7 +38,7 @@ const CtLogin = (role) => {
   const [users, setUsers] = useState([]);
   const [isCapsLockOn, setIsCapsLockOn] = useState(false);
   const [cartId, setcartId] = useState();
-  const [cartItem, setcart] = useState([]);
+  const [cartItem, setcart] = useState();
   const [login1, setLogin] = useState(false);
   const [data, setData] = useState({});
   const [picture, setPicture] = useState('');
@@ -52,6 +52,7 @@ const CtLogin = (role) => {
   const handleKeyDown = (event) => {
     setIsCapsLockOn(event.getModifierState('CapsLock'));
   };
+
   //Login with acount//
   async function getCartByUserId(userId) {
     try {
@@ -69,30 +70,92 @@ const CtLogin = (role) => {
       localStorage.setItem('CartId',firstCartId)
       // Fetch cart items for the first cart
       const cartItemsResponse = await GET_ALL(`cartItems/cart/${firstCartId}`);
-  
+      console.log("cartItemsResponse: ",cartItemsResponse.data)
       // Handle potential errors in cart items response
-      if (!cartItemsResponse.data || !Array.isArray(cartItemsResponse.data)) {
-        console.error('Invalid or empty cart items data:', cartItemsResponse);
-        return; // Exit early if cart items data is invalid
+      if (!userResponse || !userResponse.data || !Array.isArray(userResponse.data)) {
+        console.error('Invalid or empty cart data for user:', userId);
+        return; // Exit early if cart data is invalid
       }
   
       // Store cart data in localStorage
       const existingCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+      console.log("existingCartItems : ",existingCartItems)
 
+
+      modifyCartItemIDs(existingCartItems);
+      function modifyCartItemIDs(cartItems) {
+        // Loop through each cart item
+        for (const cartItem of cartItems) {
+          // Update the 'idCart' value to 2
+          cartItem.cart.id = firstCartId;
+        }
+        // Update the cart items in storage (replace 'localStorage' with your storage mechanism)
+        localStorage.setItem('cartItems', JSON.stringify(cartItems));
+        
+      }
+      let dasdas = JSON.parse(localStorage.getItem('cartItems')) || [];
+     
+      const handleUpdateQuantity = async (productId, newQuantity, cartId) => {
+        try {
+          console.log("CartID HERE", cartId)
+          if (!cartId) {
+            console.error('Cart ID not found for product ID:', productId);
+            return;
+          }
+          console.log(`Updating quality for productId ${productId} in cartId ${cartId} with quality ${newQuantity}`);
+  
+          const response = await axios.put(`http://localhost:8080/api/cartItems/${cartId}/${productId}`, { quality: newQuantity });
+  
+          if (response.status === 200) {
+            console.log('Successfully updated cart item quality.');
+  
+          } else {
+            console.error('Failed to update cart item quality:', response);
+          }
+        } catch (error) {
+          console.error('Failed to update cart item quality:', error);
+        }
+      };
       for (const newItem of cartItemsResponse.data) {
         const existingItemIndex = existingCartItems.findIndex(item => item.productId === newItem.productId);
-      
+        
         if (existingItemIndex !== -1) {
           // Update existing item
+ 
           existingCartItems[existingItemIndex].quality += newItem.quality; // Update quantity
+
+          handleUpdateQuantity(existingCartItems[existingItemIndex].productId,existingCartItems[existingItemIndex].quality,firstCartId)
+          // PUT_EDIT(`${firstCartId}/${newItem.id}`,existingCartItems)
           // Update other properties as needed (optional)
           // existingCartItems[existingItemIndex].otherProperty = newItem.otherProperty;
         }else {
           // Add new item
           existingCartItems.push(newItem);
         }
+
+      
       }
       localStorage.setItem('cartItems', JSON.stringify(existingCartItems));
+
+      console.log(dasdas.length);
+      dasdas.forEach(item => {
+        try {
+          const requestData = {
+            productId: item.productId,
+            name: item.name,
+            image: item.image,
+            price: item.price,
+            quality: item.quality,
+            cart: {
+                id:item.cart.id
+            }
+          };
+          console.log("requestdatadasdasdas: ",requestData)
+            POST_ADD(`cartItems`,requestData)
+        } catch (error) {
+          console.error('Failed to retrieve orders:', error);
+        }
+      })
       // localStorage.setItem('cartItems', JSON.stringify(cartItemsResponse.data));
       console.log('Cart data successfully fetched and stored in localStorage.');
       window.location.href = "/home";
@@ -100,23 +163,7 @@ const CtLogin = (role) => {
       console.error('Error fetching cart data:', error);
     }
   }
-
-
-  async function mergeCarts(newCartItems, existingCartItems) {
-    // Combine new and existing cart items
-    const mergedCartItems = [...existingCartItems, ...newCartItems];
   
-    // Remove duplicates based on product ID
-    const uniqueCartItems = mergedCartItems.reduce((uniqueItems, item) => {
-      if (!uniqueItems.some(existingItem => existingItem.productId === item.productId)) {
-        uniqueItems.push(item);
-      }
-      return uniqueItems;
-    }, []);
-  
-    // Update localStorage with merged and de-duplicated cart items
-    localStorage.setItem('cartItems', JSON.stringify(uniqueCartItems));
-  }
   // Login facebook
 
   const responseFacebook = (response) => {
@@ -169,9 +216,6 @@ const CtLogin = (role) => {
 
 
   //Login with Google
-
-
-
   const loginGoogle = useGoogleLogin({
     onSuccess: (codeResponse) => {
       setUsers(codeResponse);
@@ -349,6 +393,7 @@ const CtLogin = (role) => {
                             getCartByUserId(users[i].id);
                             localStorage.setItem('Login', 1);
                             bool = false;
+                         
                       
                           }
                         }

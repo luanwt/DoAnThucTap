@@ -10,7 +10,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.minhluan.backend.entity.CartItem;
 import com.minhluan.backend.entity.Product;
+import com.minhluan.backend.repository.CartItemRepository;
 import com.minhluan.backend.repository.ProductRepository;
 import com.minhluan.backend.service.ProductService;
 import lombok.AllArgsConstructor;
@@ -90,5 +92,20 @@ public class ProductServiceImpl implements ProductService {
     public void deleteProduct(Long productId) {
         productRepository.deleteById(productId);
     }
+
+
+     @Override
+    public Optional<Product> updateProduct(Long  id, int newQuality) {
+        Optional<Product> existingProduct = productRepository.findById(id);
+        if (existingProduct.isPresent()) {
+            Product product = existingProduct.get();
+            product.setQuality(newQuality);
+            // Save the updated product
+            return Optional.of(productRepository.save(product));
+          } else {
+            return Optional.empty(); // Return empty optional if the product doesn't exist
+          }
+    }
+
 
 }

@@ -7,7 +7,6 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-
 import com.minhluan.backend.entity.CartItem;
 import com.minhluan.backend.repository.CartItemRepository;
 
@@ -59,21 +58,45 @@ public class CartItemServiceimpl implements CartItemService {
         CartItemRepository.deleteById(CartItemId);
         return null;
     }
+
     @Override
-public List<CartItem> deleteAllCartItems(Long cartId) {
+    public List<CartItem> deleteAllCartItems(Long cartId) {
 
-    // 1. Find all cart items for the customer:
-    List<CartItem> cartItemsToDelete = CartItemRepository.findByCartId(cartId);
+        // 1. Find all cart items for the customer:
+        List<CartItem> cartItemsToDelete = CartItemRepository.findByCartId(cartId);
 
-    // 2. Check for empty cart (optional, but improves efficiency):
-    if (cartItemsToDelete.isEmpty()) {
-        return Collections.emptyList(); // Return empty list if no items found
+        // 2. Check for empty cart (optional, but improves efficiency):
+        if (cartItemsToDelete.isEmpty()) {
+            return Collections.emptyList(); // Return empty list if no items found
+        }
+
+        // 3. Delete all cart items in one operation (optimized):
+        CartItemRepository.deleteAllInBatch(cartItemsToDelete);
+
+        // 4. Return an empty list to indicate successful deletion:
+        return Collections.emptyList();
+
     }
 
-    // 3. Delete all cart items in one operation (optimized):
-    CartItemRepository.deleteAllInBatch(cartItemsToDelete);
+    @Override
+    public Optional<CartItem> updateCartItem(Long cartId, Long productId, int newQuality) {
+        Optional<CartItem> existingCartItem = CartItemRepository.findByCartIdAndProductId(cartId, productId);
 
-    // 4. Return an empty list to indicate successful deletion:
-    return Collections.emptyList();
-}
+        if (existingCartItem.isPresent()) {
+            CartItem cartItem = existingCartItem.get();
+            // Update the cart item with new Quality
+            cartItem.setQuality(newQuality);
+            // Save the updated cart item
+            return Optional.of(CartItemRepository.save(cartItem));
+        } else {
+            return Optional.empty(); // Return empty optional if the cart item doesn't exist
+        }
+    }
+
+
+    @Override
+    public void deleteCartItemByCartIdAndProductId(Long cartId, Long productId) {
+        Optional<CartItem> cartItem = CartItemRepository.findByCartIdAndProductId(cartId, productId);
+        cartItem.ifPresent(CartItemRepository::delete);
+    }
 }

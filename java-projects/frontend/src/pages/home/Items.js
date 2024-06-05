@@ -28,7 +28,6 @@ const Detail = (category) => {
                 </h3>
             </header>
             <div class="card card-home-category">
-               
                 <div class="row no-gutters">
                     <div class="col-md-3">
                      
@@ -42,7 +41,7 @@ const Detail = (category) => {
 					{
 					products.length > 0 && products.slice(0, 7).map((row) => (
 
-						<div class="col-xl-3 col-lg-3 col-md-4 " >
+						<div class="col-xl-3 col-lg-3 col-md-4 " key={products.id}>
 						
 							<div class="card card-product-grid">
 								<h4 class="name h4 mt-2 text-danger">{row.name}</h4>
