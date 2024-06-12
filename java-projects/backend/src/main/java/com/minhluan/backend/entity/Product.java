@@ -21,7 +21,6 @@ public class Product {
     private String name;
     private String title;
     private int price;
-   
     private int discount;
     private String brand;
     private int quality;

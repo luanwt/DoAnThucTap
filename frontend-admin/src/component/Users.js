@@ -19,14 +19,14 @@ export const listUser = (props) => (
     <List{...props}>
         <Datagrid style={{ overflowX: "auto" }}>
             <TextField source="id" />
-            <TextField source="address" />
-            <TextField source="created_at" />
-            <TextField source="deleted" />
-            <TextField source="email" />
             <TextField source="fullname" />
-            <TextField source="password" />
+            <TextField source="email" />
             <TextField source="phone_number" />
+            <TextField source="address" />
+            <TextField source="password" />
+            <TextField source="created_at" />
             <TextField source="updated_at" />
+            <TextField source="deleted" />
             <TextField source="role.name" />
             <EditButton />
             <DeleteButton />
@@ -37,14 +37,14 @@ export const listUser = (props) => (
 export const editUser = (props) => (
     <Edit{...props}>
         <SimpleForm>
-            <TextInput source="address" multiline fullWidth />
-            <DateInput source="created_at" />
-            <NumberInput source="deleted" />
-            <TextInput source="email" multiline fullWidth />
             <TextInput source="fullname" />
-            <TextInput source="password" multiline fullWidth />
+            <TextInput source="email" multiline fullWidth />
             <NumberInput source="phone_number" />
+            <TextInput source="address" multiline fullWidth />
+            <TextInput source="password" multiline fullWidth />
+            <DateInput source="created_at" />
             <DateInput source="updated_at" />
+            <NumberInput source="deleted" />
             <ReferenceInput
                 label="Role"
                 source="role.id"

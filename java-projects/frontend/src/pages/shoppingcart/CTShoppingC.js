@@ -100,7 +100,7 @@ const CTShoppingC = () => {
 		const response2 = await axios.get(`http://localhost:8080/api/products/${productId}`);
 		const num = response2.data.quality - requestData.num
 		PUT_EDIT(`products/update/${requestData.product.id}`, { quality: num })
-		delcartItems2(productId)	
+		delcartItems2(productId)
 		const response = await axios.post('http://localhost:8080/api/orderdetails', requestData);
 		console.log('Yêu cầu thành công:', response.data);
 	}
@@ -124,17 +124,22 @@ const CTShoppingC = () => {
 			// cartContainer.innerHTML = ''; // Clear previous content
 			cartItems.forEach(item => {
 				// alert(cartItems)
-				let td = document.createElement('td');
-				td.class = "itemside"
-
 				// Create a div to display each item
 				let buttonBuy = document.createElement('button');
 				buttonBuy.textContent = "Thanh Toan"
-				buttonBuy.style = "background-color: #FF6600; color: white;"
+				buttonBuy.style = "background-color: #FF6600; color: white; height: 40px";
+				buttonBuy.style.marginLeft="20px"
+				buttonBuy.style.marginTop="120px"
+				buttonBuy.style.border="none"
+				buttonBuy.style.borderRadius="5px"
 
 				let buttondel = document.createElement('button');
 				buttondel.textContent = "Xoa khoi gio hang"
-				buttondel.style = "background-color: #FF6600; color: white; paddingLeft:12"
+				buttondel.style = "background-color: #FF6600; color: white; height: 40px";
+				buttondel.style.marginLeft="10px"
+				buttondel.style.marginTop="120px"
+				buttondel.style.border="none"
+				buttondel.style.borderRadius="5px"
 				var d = item.productId
 				buttondel.onclick = delcartItems
 				buttonBuy.onclick = buyOneItem
@@ -232,36 +237,60 @@ const CTShoppingC = () => {
 				}
 
 				////////
+			
+				
 				let itemDiv = document.createElement('h4');
 				itemDiv.style.color = '#FF0000';
 				itemDiv.textContent = `${item.name} `;
-				let price = document.createElement('h5');
-
-				let price2 = item.quality * item.price / 1000;
+				let price = document.createElement('h6');
+				price.style.paddingLeft="20px"
+				price.style.marginTop="120px"
+				let price2 = item.quality * item.price 
 				// totalPrice+=item.quality*item.price;
 				UpdateTotalPrice(item.quality * item.price)
 
-				price.textContent = `Tong cong: ${price2}K vnd `;
+				price.textContent = `Tong cong: ${formatPrice(price2/1000)}`;
 				const image = document.createElement("img");
 				let itemDiv1 = document.createElement('div');
+		
+		
 				itemDiv1.textContent = `So luong: ${item.quality} `;
 				image.height = 240
 				image.width = 240
 				image.addEventListener('click', () => {
 					window.location.href = `/detailproduct?productId=${item.productId}`;
 				});
+				itemDiv1.style.marginLeft="20px"
+				itemDiv1.style.marginTop="120px"
 				let a = item.image
 				image.src = `./images/items/${a}`;
-				cartContainer.appendChild(td);
-				cartContainer.appendChild(itemDiv);
-				cartContainer.appendChild(image)
-				cartContainer.appendChild(itemDiv1);
-				cartContainer.appendChild(price);
-				cartContainer.appendChild(buttonBuy);
-				cartContainer.appendChild(buttondel);
+		
+
+				const itemDetails = document.createElement('div');
+				itemDetails.style.display="flex"
+					
+						
+			
+			
+				itemDetails.appendChild(itemDiv);
+				itemDetails.appendChild(image);
+		
+				cartContainer.appendChild(itemDetails);
+			
+				itemDetails.appendChild(itemDiv1);
+				itemDetails.appendChild(price);
+				itemDetails.appendChild(buttonBuy);
+				itemDetails.appendChild(buttondel);
+		
+			
 			});
 		}
 	}
+
+	function formatPrice(priceInXu) {
+        const dong = priceInXu * 1000; // Assuming 1 dong = 100 xu
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(dong);
+    }
 	return (
 		<>
 			<section class="section-content padding-y">
@@ -275,7 +304,12 @@ const CTShoppingC = () => {
 										{/* {setTimeout(() => {
 											displayCartItems();
 										}, 100)} */}
-										{window.onload = displayCartItems}
+										
+											
+											
+											
+										
+										{/* {window.onload = displayCartItems} */}
 									</div>
 								</div>
 								<table class="table table-borderless table-shopping-cart">
@@ -283,11 +317,16 @@ const CTShoppingC = () => {
 
 									</thead>
 									<tbody >
-										<tr class="col" >
-											<td id="cart">
-
-											</td>
-										</tr>
+									
+										<div >
+											<div id="cart"  className="row-md-4">
+											{cartItems.length > 0 ? window.onload = displayCartItems : (
+													<h4 style={{color:"#FF6666"}}>GIỎ HÀNG HIỆN TẠI ĐANG TRỐNG</h4>
+												)}
+											</div>
+											</div>
+										
+								
 									</tbody>
 								</table>
 
@@ -320,9 +359,9 @@ const CTShoppingC = () => {
 																alert("Sử dụng mã giảm giá thành công")
 																setnote("có giảm giá")
 																y.value = 100000;
-																y.textContent = y.value + " vnd"
-																z.value = totalPrice - y.value;
-																z.textContent = z.value + " vnd"
+																y.textContent =formatPrice(y.value/1000) 
+																z.value = (totalPrice - y.value)/1000;
+																z.textContent = formatPrice(z.value)
 															}
 														}}>Xác Nhận
 													</Button>
@@ -337,7 +376,7 @@ const CTShoppingC = () => {
 								<div class="card-body">
 									<dl class="dlist-align">
 										<dt>Total price:</dt>
-										<dd class="text-right"> {totalPrice} vnd</dd>
+										<dd class="text-right"> {formatPrice(totalPrice/1000)} </dd>
 									</dl>
 
 									<dl class="dlist-align">
@@ -346,21 +385,21 @@ const CTShoppingC = () => {
 									</dl>
 									<dl class="dlist-align">
 										<dt>Total:</dt>
-										<dd class="text-right  h5" id="total" ><strong>{totalPrice}</strong></dd>
+										<dd class="text-right  h5" id="total" ><strong>{formatPrice(totalPrice/1000)}</strong></dd>
 									</dl>
 									<dl>
 										<Button class="dlist-align" onClick={() => {
-											if(cartItems.length==0){
+											if (cartItems.length == 0) {
 												alert("Giỏ hàng đang trống vui lòng thêm sản phẩm vào")
 												window.location.href = "/home";
 											}
-											else{
+											else {
 												const storedUserInfo = localStorage.getItem('Account');
 												const cartId = localStorage.getItem('CartId');
 												if (storedUserInfo !== null) {
 													// var z = document.getElementById("total");
 													// alert(totalPrice)
-	
+
 													const retrievedUserInfo = JSON.parse(storedUserInfo);
 													const requestData = {
 														// Top-level data properties
@@ -378,14 +417,14 @@ const CTShoppingC = () => {
 													DELETE_ID(`cart/${cartId}`)
 													updateall(requestData)
 													localStorage.removeItem('cartItems');
-	
+
 												}
 												else {
 													alert("Vui lòng đăng nhập để có thể thanh toán")
 													window.location.href = "/login";
 												}
 											}
-										
+
 										}}> Mua Hàng <i class="fa fa-chevron-right"></i> </Button>
 									</dl>
 									<hr />

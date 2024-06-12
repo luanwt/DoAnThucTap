@@ -9,6 +9,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { error } from "jquery";
 import { useNavigate } from "react-router-dom";
+import { create } from "@mui/material/styles/createTransitions";
+import { GET_ALL, POST_ADD } from "../../api/apiService";
 
 function showpass() {
   var x = document.getElementById("pass");
@@ -18,24 +20,17 @@ function showpass() {
     x.type = "password";
   }
 }
-function showpass1() {
-  var x = document.getElementById("pass1");
-  if (x.type === "password") {
-    x.type = "text";
-  } else {
-    x.type = "password";
-  }
-}
-function dieuhuong() {
-  window.location.href = "http://localhost:3000/home";
-}
+
+
 
 const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [password2, setPassword2] = useState("");
   const [fullname, setfullname] = useState("");
   const [address, setaddress] = useState("");
   const [phone_number, setphone_number] = useState("");
+  const [checkin, setcheckin] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [isCapsLockOnPass, setIsCapsLockOnPass] = useState(false);
   const [isCapsLockOnConfirmPass, setIsCapsLockOnConfirmPass] = useState(false);
@@ -49,33 +44,48 @@ const Register = () => {
     setIsCapsLockOnConfirmPass(event.getModifierState('CapsLock'));
   };
 
-  const handleLogin = () => {
-    if (fullname !== "" && email !== "" && password !== "" && address !== "" && phone_number !== "") {
-      axios
-        .post(`http://localhost:8080/api/users`, {
-          email,
-          password,
-          fullname,
-          address,
-          phone_number,
-        })
-        .then((response) => {
-          if (response.data.success) {
-            setIsLoggedIn(true);
-          } else {
-            alert("dang ky thanh cong");
+  async function  handleLogin() {
+   
+    if (fullname !== "" && email !== "" && password !== "" && address !== "" && phone_number !== ""&& checkin!=="" ) {
+      if(password!=password2){
+          alert("Vui lòng đồng ý với các điều khoản và điều kiện");
+      }
+      else{
+        const requestData = {
+          email:email,
+          fullname: fullname,
+          password:password,
+          address:address,
+          phone_number:phone_number,
+          created_at: new Date().toISOString(),
+          updated_at:new Date().toISOString(),
+          role:{
+            id:2
           }
-        })
-      navigate('/home');
+        };
+        const response = await POST_ADD("users",requestData)
+       const requestData2 = {
+              user:{
+                id:response.data.id
+              }
+        };
+        await POST_ADD("carts",requestData2)
+
+        window.location.href = "/login";
+      }
+    }
+    else{
+      alert("Vui lòng điền đầy đủ thông tin")
     }
   };
 
   useEffect(() => {
     if (isLoggedIn) {
-      // Handle logged-in state
+     
     }
   }, [isLoggedIn]);
 
+ 
   return (
     <section class="section-content padding-y">
       <div class="card mx-auto" style={{ width: '520px' }}>
@@ -108,6 +118,7 @@ const Register = () => {
               <label>Password</label>
               <input
                 required="pass"
+                onselect="return false;" onpaste="return false;"
                 class="form-control"
                 type="password"
                 id="pass"
@@ -129,12 +140,16 @@ const Register = () => {
             <div class="form-row">
               <label>Confirm password</label>
               <input
+               onselect="return false;" onpaste="return false;"
                 required="pass"
                 class="form-control"
                 type="password"
                 id="pass1"
+                value={password2}
+                onChange={(e) => setPassword2(e.target.value)}
                 placeholder="Mật khẩu xac nhan"
                 onKeyDown={handleKeyDownConfirmPass}
+                
               />
               {isCapsLockOnConfirmPass && <p>⚠️Capslock is on</p>}
 
@@ -163,16 +178,16 @@ const Register = () => {
               />
             </div>
             <div class="form-group">
-              <button onClick={handleLogin} type="submit" class="btn btn-primary btn-block"> Register</button>
+              <button onClick={handleLogin} type="submit" class="btn btn-primary btn-block" style={{marginTop:"20px"}}> Register</button>
             </div>
             <div class="form-group">
-              <div class="custom-control custom-checkbox">
-                <input type="checkbox" class="custom-control-input" defaultChecked />
-                <label class="custom-control-label">
-                  I am agree with <a href="#">terms and conditions</a>
-                </label>
+                <div class="custom-control custom-checkbox">
+                  <input type="checkbox" class="custom-control-input" id="agreeCheckbox"  onClick={() => { setcheckin(2)}}/> 
+                   <label class="custom-control-label" for="agreeCheckbox">Tôi đồng ý với <a href="#">các điều khoản và điều kiện</a>
+                  </label>
+                </div>
               </div>
-            </div>
+
           </form>
         </article>
       </div>

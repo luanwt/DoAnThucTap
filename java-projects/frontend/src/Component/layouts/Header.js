@@ -93,8 +93,7 @@ function Header({cartItemCount}) {
 			}	
 	};
 
-	const  storedUserInfo  = localStorage.getItem('Account');
-
+	const  storedUserInfo  = JSON.parse(localStorage.getItem('Account'));
 	/////////////////
 	let login=localStorage.getItem('Login')
 		if(storedUserInfo==null || storedUserInfo =="[]" ){
@@ -159,7 +158,9 @@ function Header({cartItemCount}) {
 													
 													window.location.href = "/profile";
 												}
-											}}><small>Tai khoan</small></Link>
+											}}>{storedUserInfo?(<small>{storedUserInfo.name}</small>):(<small>Tài khoản</small>)}
+											
+												</Link>
 									</a>
 								</div>
 								<div class="widget-header mr-3">

@@ -52,6 +52,8 @@ import {
   editToken,
   createToken,
 } from './component/Token';
+import { createCart, editCart, listCart } from './component/Cart';
+import { createCartitem, editCartitem, listCartitem } from './component/CartItems';
 
 // const httpClient = fetchUtils.fetchJson;
 const App = () => (
@@ -65,6 +67,16 @@ const App = () => (
       list={listToken}
       edit={editToken}
       create={createToken}
+    />
+     <Resource name="carts"
+      list={listCart}
+      edit={editCart}
+      create={createCart}
+    />
+     <Resource name="cartItems"
+      list={listCartitem}
+      edit={editCartitem}
+      create={createCartitem}
     />
 
     <Resource name="orders"

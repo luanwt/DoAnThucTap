@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import '../../assets/js/bootstrap.bundle.min.js';
 import React, { useEffect, useState, MessageEvent } from "react";
 import { GET_ALL, POST_ADD, PUT_EDIT } from "../../api/apiService";
@@ -30,7 +30,7 @@ function remember() { }
 
 var bool = true;
 const CtLogin = (role) => {
-
+  const navigate = useNavigate();
   localStorage.setItem('Account1', 0);
   localStorage.getItem('Account', JSON.stringify([]));
   let login = localStorage.getItem('Login');
@@ -58,28 +58,27 @@ const CtLogin = (role) => {
     try {
       // Fetch user's cart data
       const userResponse = await GET_ALL(`carts/user/${userId}`);
-  
-      // Handle potential errors in user response
+
+
       if (!userResponse.data || !Array.isArray(userResponse.data)) {
         console.error('Invalid or empty cart data for user:', userId);
         return; // Exit early if cart data is invalid
       }
-  
-      // Access the first cart item's ID (assuming non-empty cart)
+
       const firstCartId = userResponse.data[0].id;
-      localStorage.setItem('CartId',firstCartId)
-      // Fetch cart items for the first cart
+      localStorage.setItem('CartId', firstCartId)
+
       const cartItemsResponse = await GET_ALL(`cartItems/cart/${firstCartId}`);
-      console.log("cartItemsResponse: ",cartItemsResponse.data)
+      console.log("cartItemsResponse: ", cartItemsResponse.data)
       // Handle potential errors in cart items response
       if (!userResponse || !userResponse.data || !Array.isArray(userResponse.data)) {
         console.error('Invalid or empty cart data for user:', userId);
         return; // Exit early if cart data is invalid
       }
-  
+
       // Store cart data in localStorage
       const existingCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-      console.log("existingCartItems : ",existingCartItems)
+      console.log("existingCartItems : ", existingCartItems)
 
 
       modifyCartItemIDs(existingCartItems);
@@ -91,10 +90,10 @@ const CtLogin = (role) => {
         }
         // Update the cart items in storage (replace 'localStorage' with your storage mechanism)
         localStorage.setItem('cartItems', JSON.stringify(cartItems));
-        
+
       }
       let dasdas = JSON.parse(localStorage.getItem('cartItems')) || [];
-     
+
       const handleUpdateQuantity = async (productId, newQuantity, cartId) => {
         try {
           console.log("CartID HERE", cartId)
@@ -103,12 +102,12 @@ const CtLogin = (role) => {
             return;
           }
           console.log(`Updating quality for productId ${productId} in cartId ${cartId} with quality ${newQuantity}`);
-  
+
           const response = await axios.put(`http://localhost:8080/api/cartItems/${cartId}/${productId}`, { quality: newQuantity });
-  
+
           if (response.status === 200) {
             console.log('Successfully updated cart item quality.');
-  
+
           } else {
             console.error('Failed to update cart item quality:', response);
           }
@@ -118,22 +117,22 @@ const CtLogin = (role) => {
       };
       for (const newItem of cartItemsResponse.data) {
         const existingItemIndex = existingCartItems.findIndex(item => item.productId === newItem.productId);
-        
+
         if (existingItemIndex !== -1) {
           // Update existing item
- 
+
           existingCartItems[existingItemIndex].quality += newItem.quality; // Update quantity
 
-          handleUpdateQuantity(existingCartItems[existingItemIndex].productId,existingCartItems[existingItemIndex].quality,firstCartId)
+          handleUpdateQuantity(existingCartItems[existingItemIndex].productId, existingCartItems[existingItemIndex].quality, firstCartId)
           // PUT_EDIT(`${firstCartId}/${newItem.id}`,existingCartItems)
           // Update other properties as needed (optional)
           // existingCartItems[existingItemIndex].otherProperty = newItem.otherProperty;
-        }else {
+        } else {
           // Add new item
           existingCartItems.push(newItem);
         }
 
-      
+
       }
       localStorage.setItem('cartItems', JSON.stringify(existingCartItems));
 
@@ -147,11 +146,11 @@ const CtLogin = (role) => {
             price: item.price,
             quality: item.quality,
             cart: {
-                id:item.cart.id
+              id: item.cart.id
             }
           };
-          console.log("requestdatadasdasdas: ",requestData)
-            POST_ADD(`cartItems`,requestData)
+          console.log("requestdatadasdasdas: ", requestData)
+          POST_ADD(`cartItems`, requestData)
         } catch (error) {
           console.error('Failed to retrieve orders:', error);
         }
@@ -163,8 +162,92 @@ const CtLogin = (role) => {
       console.error('Error fetching cart data:', error);
     }
   }
-  
+
   // Login facebook
+
+  async function checkToken(response) {
+    const token = await GET_ALL(`token`);
+    let a=1
+    console.log(token.data);
+    if (token.data.length == 0) {
+      console.log("dang nulllll")
+      let newItem = {
+        fullname: response.name,
+        email: 'luancui281103@gmail.com',
+        address: '44/109 Tan Chan Hiep Q12 TP HCM',
+        phone_number: '0765626651',
+        password: "162426",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        role: {
+          id: 2
+        },
+      }; PostUserandCart(newItem, response.id,response.picture.data.url)
+    }
+    else {
+      token.data.forEach(token => {
+        if (token.token == response.id) {
+          console.log("token da ton tai")
+          let newItem2 = {
+            id: token.user.id,
+            name: response.name,
+            email: 'luancui281103@gmail.com',
+            address: '44/109 Tan Chan Hiep Q12 TP HCM',
+            phonenumber: '0765626651',
+            image: response.picture.data.url
+          };
+          localStorage.setItem('Account', JSON.stringify(newItem2));
+          a=2
+        }
+       
+      });
+      if(a==1){
+        let newItem = {
+          fullname: response.name,
+          email: 'luancui281103@gmail.com',
+          address: '44/109 Tan Chan Hiep Q12 TP HCM',
+          phone_number: '0765626651',
+          password: "162426",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          role: {
+            id: 2
+          },
+        }; PostUserandCart(newItem, response.id)
+
+      }
+    }
+  }
+  async function PostUserandCart(newItem, tokenid,image) {
+    const response = await POST_ADD(`users`, newItem)
+    const requestData2 = {
+      user: {
+        id: response.data.id
+      }
+    };
+
+    let newItem2 = {
+      id: response.data.id,
+      name: newItem.name,
+      email: 'luancui281103@gmail.com',
+      address: '44/109 Tan Chan Hiep Q12 TP HCM',
+      phonenumber: '0765626651',
+      image: image
+    };
+    localStorage.setItem('Account', JSON.stringify(newItem2));
+
+
+    await POST_ADD("carts", requestData2)
+    const requestData3 = {
+      token: tokenid,
+      created_at: new Date().toISOString(),
+      user: {
+        id: response.data.id
+      }
+    };
+    await POST_ADD(`token`, requestData3)
+  }
+
 
   const responseFacebook = (response) => {
     if (response.status != "unknown") {
@@ -174,20 +257,14 @@ const CtLogin = (role) => {
       console.log("email:", response.email)
       setPicture(response.picture.data.url);
       if (login != 1) {
-        let newItem = {
-          id: response.id,
-          name: response.name,
-          email: 'luancui281103@gmail.com',
-          address: '44/109 Tan Chan Hiep Q12 TP HCM',
-          phonenumber: '0765626651',
-          image: response.picture.data.url
-        };
-        localStorage.setItem('Account', JSON.stringify(newItem));
+
+        checkToken(response)
+
         localStorage.setItem("accessToken", response.accessToken);
         localStorage.setItem('Account1', 1);
         localStorage.setItem('Login', 1);
 
-        window.location.href = "/home";
+        // window.location.href = "/home";
       }
       else {
         alert("Vui lòng đăng xuất tài khoản hiện tại!");
@@ -232,6 +309,90 @@ const CtLogin = (role) => {
   const errorMessage = (error) => {
     console.log(error);
   };
+
+  async function checkTokenGG(response) {
+    const token = await GET_ALL(`token`);
+    let a=1
+    if (token.data.length == 0) {
+      console.log("dang nulllll")
+      let newItem = {
+        fullname: response.name,
+        email: response.email,
+        address: '44/109 Tan Chan Hiep Q12 TP HCM',
+        phone_number: response.phone,
+        password: "162426",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        role: {
+          id: 2
+        },
+      }; PostUserandCartGG(newItem, response.id,response.picture.toString())
+    }
+    else {
+      token.data.forEach(token => {
+        if (token.token == response.id) {
+          console.log("token da ton tai")
+          let newItem2 = {
+            id: response.id,
+            name: response.name,
+            email: response.email,
+            address: '44/109 Tan Chan Hiep Q12 TP HCM',
+            phonenumber: response.phone,
+            image: response.picture.toString()
+          };
+          localStorage.setItem('Account', JSON.stringify(newItem2));
+          a=2
+        }
+      }
+    );
+    if(a==1) {
+      let newItem = {
+        fullname: response.name,
+        email: response.email,
+        address: '44/109 Tan Chan Hiep Q12 TP HCM',
+        phone_number: response.phone,
+        password: "162426",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        role: {
+          id: 2
+        },
+      
+      };
+      console.log(newItem)
+      PostUserandCartGG(newItem, response.id,response.picture.toString())
+
+    }
+    }
+  }
+  async function PostUserandCartGG(newItem, tokenid,image) {
+    const response = await POST_ADD(`users`, newItem)
+    const requestData2 = {
+      user: {
+        id: response.data.id
+      }
+    };
+
+    let newItem2 = {
+      id: response.data.id,
+      name: response.data.fullname,
+      email: response.data.email,
+      phone: response.data.phone,
+      image: image
+    };
+    localStorage.setItem('Account', JSON.stringify(newItem2));
+
+
+    await POST_ADD("carts", requestData2)
+    const requestData3 = {
+      token: tokenid,
+      created_at: new Date().toISOString(),
+      user: {
+        id: response.data.id
+      }
+    };
+    await POST_ADD(`token`, requestData3)
+  }
   useEffect(
     () => {
       if (users) {
@@ -244,20 +405,21 @@ const CtLogin = (role) => {
           })
           .then((res) => {
             setProfile(res.data);
-            console.log(res.data)
+      
 
             if (login != 1) {
-              let newItem = {
-                id: res.data.id,
-                name: res.data.name,
-                email: res.data.email,
-                phone: res.data.phone,
-                image: res.data.picture.toString(),
-              };
-              localStorage.setItem('Account', JSON.stringify(newItem));
+              // let newItem = {
+              //   id: res.data.id,
+              //   name: res.data.name,
+              //   email: res.data.email,
+              //   phone: res.data.phone,
+              //   image: res.data.picture.toString(),
+              // };
+              // localStorage.setItem('Account', JSON.stringify(newItem));
+              checkTokenGG(res.data)
               localStorage.setItem('Login', 1);
               localStorage.setItem('Account1', 1);
-              window.location.href = "/home";
+              // window.location.href = "/home";
             }
             else {
               alert("Vui lòng đăng xuất tài khoản hiện tại!");
@@ -306,45 +468,15 @@ const CtLogin = (role) => {
       <section class="section-conten padding-y-10">
         <div class="card mx-auto" style={{ paddingLeft: 300, paddingRight: 300 }}>
           <div class="card-body">
-            <h4 class="card-title mb-4">Đăng nhập </h4>
-            <form class="formLogin">
-              <a href="#" class="btn btn-facebook " style={{ maxWidth: 400, marginLeft: 450, color: "#FFFFFF" }}>
-                <FacebookLogin
-                  appId="361745122984111"
-                  autoLoad={true}
-                  fields="name,email,picture"
-                  scope="public_profile,user_friends"
-                  callback={responseFacebook}
-                  icon="fa-facebook" />
-              </a>
+            <h3 class="card-title mb-4">Đăng nhập </h3>
+            <form class="formLogin" style={{ paddingLeft: 300 }}>
 
-              <a href="#" class=" btn-block mb-4  " style={{ maxWidth: 400, marginLeft: 405, color: "#FFFFFF" }}>
-                <button onClick={loginGoogle}
-                  style={{
-                    minHeight: 50, minWidth: 280, background: "#4285F4",  /* Classic Google blue */
-                    color: "#fff",
-                    padding: "10px,20px",
-                    border: "none",
-                    borderRadius: "5px",
-                    boxShadow: " 0 2px 5px rgba(0, 0, 0, 0.16), 0 5px 10px rgba(0, 0, 0, 0.12)",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    fontWeight: "bold",
-                    fontSize: "16px",
-                    cursor: "pointer",
-                    maxWidth: "360px",
-                    margin: "0 auto",
-                  }}>
-                  <i class="fab fa-google">  Sign in with Google </i> </button>
-              </a>
 
-              <div class="form-group">
+              <div class="form-group" style={{ width: 520 }}>
                 <input name="" class="form-control" placeholder="Username" required="text" id="inputaccount" />
               </div>
 
-              <div class="form-group">
+              <div class="form-group" style={{ width: 520 }}>
                 <input
                   type="password"
                   placeholder="Password"
@@ -366,50 +498,90 @@ const CtLogin = (role) => {
                   />
                 </FormGroup>
               </div>
-
               <div class="form-group">
-                <a href="#" class="float-right">Quên mật khẩu</a>
+                <a href="#" class="float-mid">Quên mật khẩu</a>
               </div>
-              <div class="form-group">
-                <Button
-                  class='form-control'
-                  style={{ minWidth: 550, marginLeft: 320, color: "#FFFFFF" }}
-                  onClick={() => {
-                    if (login != 1) {
-                      var x = document.getElementById("inputaccount");
-                      var y = document.getElementById("myInput");
-                      if (users.length > 0) {
-                        for (var i = 0; i < users.length; i++) {
-                          if (x.value == users[i].email && y.value == users[i].password) {
-                            let newItem = {
-                              id: users[i].id,
-                              name: users[i].fullname,
-                              email: users[i].email,
-                              address: users[i].address,
-                              phonenumber: users[i].phone_number,
-                              image: image
-                            };
-                            localStorage.setItem('Account', JSON.stringify(newItem));
-                            getCartByUserId(users[i].id);
-                            localStorage.setItem('Login', 1);
-                            bool = false;
-                         
-                      
-                          }
-                        }
-                        if (bool == true) {
-                          alert('Sai tk mk roi');
-                        }
-                      }
-                    } else {
-                      alert("Vui long dang xuat tai khoan hien tai");
-                      window.location.href = "/profile";
-                    }
-                  }}>Đăng nhập
-                </Button>
 
-              </div>
+
             </form>
+            <Button
+              class='form-control'
+              style={{ minWidth: 550, marginLeft: 320, color: "#FFFFFF" }}
+              onClick={() => {
+                if (login != 1) {
+                  var x = document.getElementById("inputaccount");
+                  var y = document.getElementById("myInput");
+                  if (users.length > 0) {
+                    for (var i = 0; i < users.length; i++) {
+                      if (x.value == users[i].email && y.value == users[i].password) {
+                        let newItem = {
+                          id: users[i].id,
+                          name: users[i].fullname,
+                          email: users[i].email,
+                          address: users[i].address,
+                          phonenumber: users[i].phone_number,
+                          image: image
+                        };
+                        localStorage.setItem('Account', JSON.stringify(newItem));
+                        getCartByUserId(users[i].id);
+                        localStorage.setItem('Login', 1);
+                        bool = false;
+
+
+                      }
+                    }
+                    if (bool == true) {
+                      alert('Sai tk mk roi');
+                    }
+                  }
+                } else {
+                  alert("Vui long dang xuat tai khoan hien tai");
+                  window.location.href = "/profile";
+                }
+              }}>Đăng nhập
+            </Button>
+            <a href="#" class="btn btn-facebook " style={{ maxWidth: 400, marginLeft: 450, color: "#FFFFFF" }}>
+              <FacebookLogin
+                appId="361745122984111"
+                autoLoad={true}
+                fields="name,email,picture"
+                scope="public_profile,user_friends"
+                callback={responseFacebook}
+                icon="fa-facebook" />
+            </a>
+
+            <a href="#" class=" btn-block mb-4  " style={{ maxWidth: 400, marginLeft: 405, color: "#FFFFFF" }}>
+              <button onClick={loginGoogle}
+                style={{
+                  minHeight: 50, minWidth: 280, background: "#4285F4",  /* Classic Google blue */
+                  color: "#fff",
+                  padding: "10px,20px",
+                  border: "none",
+                  borderRadius: "5px",
+                  boxShadow: " 0 2px 5px rgba(0, 0, 0, 0.16), 0 5px 10px rgba(0, 0, 0, 0.12)",
+                  textAlign: "center",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  fontWeight: "bold",
+                  fontSize: "16px",
+                  cursor: "pointer",
+                  maxWidth: "360px",
+                  margin: "0 auto",
+                }}>
+                <i class="fab fa-google">  Sign in with Google </i> </button>
+            </a>
+            <div class="form-group">
+
+
+            </div>
+            <label className="form-group" style={{ marginLeft: 450 }}>
+              Bạn chưa có tài khoản?{' '}
+              <button onClick={() => navigate('/register')}>
+                Đăng ký ở đây
+              </button>
+            </label>
+            <button onClick={() => checkToken()}>checkToken</button>
           </div>
         </div>
 

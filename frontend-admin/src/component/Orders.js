@@ -19,14 +19,14 @@ export const listOrders = (props) => (
     <List{...props}>
         <Datagrid style={{ overflowX: "auto" }}>
             <TextField source="id" />
-            <TextField source="address" />
-            <TextField source="email" />
             <TextField source="fullname" />
+            <TextField source="email" />
+            <TextField source="phone_number" />
+            <TextField source="address" />
             <TextField source="note" />
             <TextField source="order_data" />
-            <TextField source="phone_number" />
             <TextField source="status" />
-            <TextField source="total_money" />  
+            <TextField source="total_money" />
             <TextField source="user.fullname" />
             <EditButton />
             <DeleteButton />
@@ -37,12 +37,12 @@ export const listOrders = (props) => (
 export const editOrder = (props) => (
     <Edit{...props}>
         <SimpleForm>
-            <TextInput source="address" multiline fullWidth />
-            <TextInput source="email" multiline fullWidth />
             <TextInput source="fullname" />
+            <TextInput source="email" multiline fullWidth />
+            <NumberInput source="phone_number" />
+            <TextInput source="address" multiline fullWidth />
             <TextInput source="note" />
             <TextInput source="order_data" />
-            <NumberInput source="phone_number" />
             <NumberInput source="status" />
             <NumberInput source="total_money" />
             <ReferenceInput
@@ -58,12 +58,12 @@ export const editOrder = (props) => (
 export const createOrder = (props) => (
     <Create{...props}>
         <SimpleForm>
-            <TextInput source="address" multiline fullWidth />
-            <TextInput source="email" multiline fullWidth />
             <TextInput source="fullname" />
+            <TextInput source="email" multiline fullWidth />
+            <NumberInput source="phone_number" />
+            <TextInput source="address" multiline fullWidth />
             <TextInput source="note" />
             <TextInput source="order_data" />
-            <NumberInput source="phone_number" />
             <NumberInput source="status" />
             <NumberInput source="total_money" />
             <ReferenceInput

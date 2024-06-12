@@ -16,6 +16,11 @@ const Detail = (category) => {
 	setProducts(item.data)
 	);
 	}, [categoryId]);
+
+	function formatPrice(priceInXu) {
+        const dong = priceInXu; // Assuming 1 dong = 100 xu
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(dong);
+    }
 	return (
 		<section class="padding-bottom">
 			        <section class="padding-bottom">
@@ -68,8 +73,8 @@ const Detail = (category) => {
 										<span className="out-of-stock">Hết hàng</span>
 										)}
 									</div>
-									<div class="price h5 mt-2"><del>Giá gốc:{row.price} vnd</del></div>
-									<div class="price h5 mt-2">Giảm còn:{row.discount} vnd</div>
+									<div class="price h5 mt-2"><del>Giá gốc:{formatPrice(row.price)}</del></div>
+									<div class="price h5 mt-2">Giảm còn:{formatPrice(row.discount)} </div>
 								</figcaption>
 							</div>
 						</div>

@@ -36,33 +36,45 @@ export const editOrderDetail = (props) => (
             <NumberInput source="num" />
             <NumberInput source="price" />
             <NumberInput source="total_money" />
+
+
             <ReferenceInput
                 label="Order"
                 source="order.id"
                 reference="orders">
             <SelectInput optionText="id" />
             </ReferenceInput>
+            <ReferenceInput
+                label="Product"
+                source="product.id"
+                reference="products">
+            <SelectInput optionText="id" />
+            </ReferenceInput>
         </SimpleForm>
     </Edit>
 );
 
-// export const createOrderDetail = (props) => (
-//     <Create{...props}>
-//         <SimpleForm>
-//             <TextInput source="address" multiline fullWidth />
-//             <TextInput source="email" multiline fullWidth />
-//             <TextInput source="fullname" />
-//             <TextInput source="note" />
-//             <TextInput source="OrderDetail_data" />
-//             <NumberInput source="phone_number" />
-//             <NumberInput source="status" />
-//             <NumberInput source="total_money" />
-//             <ReferenceInput
-//                 label="User"
-//                 source="user.id"
-//                 reference="users">
-//                 <SelectInput optionText="fullname" />
-//             </ReferenceInput>
-//         </SimpleForm>
-//     </Create>
-// );
+export const createOrderDetail = (props) => (
+    <Create{...props}>
+        <SimpleForm>
+        <NumberInput source="num" />
+            <NumberInput source="price" />
+            <NumberInput source="total_money" />
+
+
+            <ReferenceInput
+                label="Order"
+                source="order.id"
+                reference="orders">
+            <SelectInput optionText="id" />
+            </ReferenceInput>
+
+            <ReferenceInput
+                label="Product"
+                source="product.id"
+                reference="products">
+            <SelectInput optionText="name" />
+            </ReferenceInput>
+        </SimpleForm>
+    </Create>
+);

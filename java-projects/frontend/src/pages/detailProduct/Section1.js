@@ -92,7 +92,7 @@ const Section1 = () => {
 	// Function to handle input changes
 	const handleInputChange = (e) => {
 		const value = e.target.value;
-		if (Number.isInteger(parseInt(value, 10)) && parseInt(value, 10) > 0) {
+		if (Number.isInteger(parseInt(value, 10)) && parseInt(value, 10) > 0 && parseInt(value, 10) <= product.quality) {
 			setInputValue(e.target.value);
 		}
 	};
@@ -250,13 +250,17 @@ const Section1 = () => {
 			};
 			console.log(requestData)
 			POST_ADD(`feedbacks`, requestData)
-			alert("cap nhat comment thanh cong")
 			window.location.reload();
 		}
 
 	};
 
 	/////
+
+	function formatPrice(priceInXu) {
+        const dong = priceInXu; // Assuming 1 dong = 100 xu
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(dong);
+    }
 	return (
 		<section>
 			<section class="py-3 bg-light">
@@ -313,15 +317,11 @@ const Section1 = () => {
 									</small>
 								</div>
 								<div class="mb-3">
-									<h2 class="title mt-3" >Gia: {product.discount}
-										<a>
-											vnd
-										</a>
+									<h2 class="title mt-3" >Gia: {formatPrice(product.discount)}
+										
 									</h2>
-									<del style={{ fontSize: '1.6rem', color: '#e63b3b' }} class="text-muted">Gia goc: {product.price}</del>
-									<a>
-										vnd
-									</a>
+									<del style={{ fontSize: '1.6rem', color: '#e63b3b' }} class="text-muted">Gia goc: {formatPrice(product.price)}</del>
+									
 								</div>
 								<p>
 									{" "}
@@ -353,10 +353,10 @@ const Section1 = () => {
 
 												<li class="list-inline-item mr-5" >
 
-													<div class="form-inline" style={{ minwidth: 80, whiteSpace: "nowrap" }} >
+													<div class="form-inline" >
 														<label class="mr-2">So luong</label>
 
-														<input class="form-control form-control-sm" style={{ minWidth: 80, fontSize: '1.6rem', color: '#e63b3b' }} value={inputValue} type="number" id="quality" onChange={handleInputChange}></input>
+														<input  style={{ width: "fit-content", fontSize: '1.3rem', color: '#e63b3b' }} value={inputValue} type="number" id="quality" onChange={handleInputChange}></input>
 
 
 													</div>
@@ -380,39 +380,34 @@ const Section1 = () => {
 									</div>
 								</div>
 
-								<h4 class="title mt-3" style={{ color: "red" }}>Tong cong:{product.discount * handleClick() / 1000}K vnd</h4>
+								<h4 class="title mt-3" style={{ color: "red" }}>Tổng cộng : {formatPrice(product.discount * handleClick())}</h4>
 							</article>
 						</main>
-						<div class="comments">
+						<div class="comments" style={{ border: "2px solid ",width: "600px"}}>
 							<h2>Đánh giá</h2>
-							<ul class="comments-list" >
+							<ul class="comments-list"  >
 								{filteredFeedBack.length > 0 && (
 									<>
 										{filteredFeedBack.map((row) => (
 									
-										<li class="comment" key={row.id}>
+										<li class="comment" key={row.id} style={{paddingTop: 10}}>
 										<div class="comment-header">
 
 											<div class="comment-info">
 												<span class="comment-author">{row.fullname} </span>
-												<span class="comment-date">2024-06-05</span>
+												<span class="comment-date">{row.created_at}</span>
 											</div>
 										</div>
 										<div class="comment-content">
 											{row.content}
 										</div>
-										
-										{/* <div class="comment-actions">
-												<a href="#" class="comment-reply">Trả lời</a>
-											</div> */}
+											
 									</li>
 
 										))}
 									</>
 								)}
-
-
-								<li class="comment-add">
+								<div class="comment-add" style={{paddingTop: 20}}>
 
 									<div class="comment-input">
 										<textarea name="comment" id="feedbacks" placeholder="Viết bình luận của bạn..."></textarea>
@@ -421,7 +416,7 @@ const Section1 = () => {
 										addfeedback()
 									}}>Gửi</button>
 
-								</li>
+								</div>
 							</ul>
 						</div>
 					</div>
