@@ -45,10 +45,10 @@ const Register = () => {
   };
 
   async function  handleLogin() {
-   
-    if (fullname !== "" && email !== "" && password !== "" && address !== "" && phone_number !== ""&& checkin!=="" ) {
+   if(checkin!==""){
+    if (fullname !== "" && email !== "" && password !== "" && address !== "" && phone_number !== "" ) {
       if(password!=password2){
-          alert("Vui lòng đồng ý với các điều khoản và điều kiện");
+          alert("Mật khẩu xác nhận chưa đúng");
       }
       else{
         const requestData = {
@@ -77,6 +77,11 @@ const Register = () => {
     else{
       alert("Vui lòng điền đầy đủ thông tin")
     }
+   }
+   else{
+    console.log("vui lòng chấp nhận các điều khoản và điều kiện")
+   }
+  
   };
 
   useEffect(() => {

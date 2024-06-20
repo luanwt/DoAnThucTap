@@ -17,6 +17,7 @@ export const listCart =(props)=>(
     <List{...props}>
     <Datagrid>
         <TextField source="id"/>
+        <TextField source="user.id"/>
         <TextField source="user.fullname"/>
         <EditButton/>
         <DeleteButton/>

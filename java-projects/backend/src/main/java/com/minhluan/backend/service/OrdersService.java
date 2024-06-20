@@ -9,4 +9,6 @@ public interface OrdersService {
     public List<Orders> getAllOrderss();
     public Orders updateOrders(Orders Orders);
     public Orders deleteOrders(Long OrdersId);
+    public List<Orders> getOrderssByuserId(Long userId);
+  
 }

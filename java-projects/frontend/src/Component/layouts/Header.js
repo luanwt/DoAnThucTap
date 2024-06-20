@@ -207,8 +207,6 @@ function Header({cartItemCount}) {
 							<li class="nav-item dropdown">
 								<a
 									class="nav-link dropdown-toggle"
-
-
 									href="#"
 									id="navbarDropdown"
 									role="button"
@@ -216,9 +214,7 @@ function Header({cartItemCount}) {
 									aria-haspopup="true"
 									aria-expanded="false"
 								>
-
 									Danh sách sản phẩm
-
 								</a>
 								<div class="dropdown-menu" aria-labelledby="navbarDropdown">
 									{filteredCategories.length >
@@ -267,6 +263,7 @@ function Header({cartItemCount}) {
 					<div class="collapse navbar-collapse" id="clock">
 						<h3 id="date-time"></h3>
 					</div>
+			
 					<div class="collapse navbar-collapse" id="main_nav">
 						<ul class="navbar-nav ml-md-auto">
 						

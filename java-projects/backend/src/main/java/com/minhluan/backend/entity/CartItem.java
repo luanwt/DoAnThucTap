@@ -21,6 +21,7 @@ public class CartItem {
     private String image;
     private Long price;
     private int quality;
+    private String size;
    @ManyToOne
     private Cart cart;
 }

@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { GET_ID } from "../../api/apiService";
+import { GET_ALL, GET_ID } from "../../api/apiService";
 import image from '../../assets/images/avatars/avatar3.jpg'
 const cardTextStyle = {
     maxWidth: "80%",
@@ -13,13 +13,17 @@ const cardTextStyle = {
 
 const CTProflieM = () => {
     const [user, setUsers] = useState({});
-
+    const [orders, setorders] = useState({});
     let User = JSON.parse(localStorage.getItem('Account')) || [];
 
     const storedUserInfo = localStorage.getItem('Account');
     const storedUserInfo1 = localStorage.getItem('Account1');
 
     const retrievedUserInfo = JSON.parse(storedUserInfo);
+
+    useEffect(() => {	
+		GET_ALL(`orders/user/${retrievedUserInfo.id}`).then((item) => setorders(item.data));
+	}, []);
     // alert(retrievedUserInfo.id)
     return (
         <>
@@ -51,7 +55,7 @@ const CTProflieM = () => {
                         <article class="card-group card-stat">
                             <figure class="card bg">
                                 <div class="p-3">
-                                    <h4 class="title text-danger">38</h4>
+                                    <h4 class="title text-danger">{orders.length}</h4>
                                     <span>Đơn hàng</span>
                                 </div>
                             </figure>

@@ -86,10 +86,10 @@ const GridContent2 = () => {
 		const filteredProducts = products2.filter((product) => {
 		  if (maxPrice === null) {
 			// Only minimum price filter
-			return product.price > minPrice;
+			return product.price >= minPrice;
 		  } else {
 			// Minimum and maximum price filter
-			return product.price > minPrice && product.price < maxPrice;
+			return product.price >= minPrice && product.price < maxPrice;
 		  }
 		});
 	  
@@ -113,7 +113,7 @@ const GridContent2 = () => {
 									<li class="breadcrumb-item"><a href="/">Home</a></li>
 									<li class="breadcrumb-item"><a>{categories.name}</a></li>
 									<li class="breadcrumb-item"><a href="/">Danh mục</a></li>
-									<li class="breadcrumb-item active" aria-current="page">Sản phẩm</li>
+									<li class="breadcrumb-item active" aria-current="page">Tất Cả Sản phẩm</li>
 								</ol>
 							</nav>
 						</div>

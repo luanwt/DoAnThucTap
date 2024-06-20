@@ -14,6 +14,10 @@ const SearchResults = ({ results }) => {
     function ChangeCircle(result){
      window.location.href = `/detailproduct?productId=${result}`;    
     }
+    function formatPrice(priceInXu) {
+      const dong = priceInXu ; // Assuming 1 dong = 100 xu
+      return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(dong);
+    }
   return(
   <table class="search-results-table ms-3">
 
@@ -34,7 +38,7 @@ const SearchResults = ({ results }) => {
           <td class="info-cell mt-4">
         
             <div class="name">name:{result.name}</div>
-            <div class="price">{result.price}vnd</div>
+            <div class="price">{formatPrice(result.price)}</div>
           </td>
         </tr>
       ))}

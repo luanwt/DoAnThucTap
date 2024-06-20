@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 import { DELETE_ALL, DELETE_ID, POST_ADD } from "../../api/apiService";
 
-
+import { googleLogout } from '@react-oauth/google';
 
 const MenuProflie = () => {
 
@@ -43,6 +43,9 @@ const MenuProflie = () => {
 			}, { accessToken: accessToken });
 		}
 	}
+	const logOut = () => {
+		googleLogout();
+	  };
 
 	///Update Cart to database
 	return (
@@ -57,8 +60,9 @@ const MenuProflie = () => {
 				<Link class="nav-link" onClick={(e) => {
 					e.preventDefault();
 					handleLogout();
+					logOut();
 					localStorage.removeItem("Account");
-					// localStorage.removeItem("accessToken");
+					localStorage.removeItem("accessToken");
 					localStorage.removeItem('cartItems');
 					localStorage.removeItem('CartId');
 					window.location.href = "/Login";

@@ -39,7 +39,7 @@ export const editUser = (props) => (
         <SimpleForm>
             <TextInput source="fullname" />
             <TextInput source="email" multiline fullWidth />
-            <NumberInput source="phone_number" />
+            <TextInput source="phone_number" />
             <TextInput source="address" multiline fullWidth />
             <TextInput source="password" multiline fullWidth />
             <DateInput source="created_at" />
@@ -65,7 +65,7 @@ export const createUser = (props) => (
             <TextInput source="email" multiline fullWidth />
             <TextInput source="fullname" />
             <TextInput source="password" multiline fullWidth />
-            <NumberInput source="phone_number" />
+            <TextInput source="phone_number" />
             <DateInput source="updated_at" />
             <ReferenceInput
                 label="Role"

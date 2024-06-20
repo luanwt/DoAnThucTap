@@ -9,6 +9,7 @@ const cardTextStyle = {
 	maxWidth: "80%",
 };
 const Detail = (category) => {
+
 	const { categoryName, categoryId } = category;
 	const [products, setProducts] = useState([]);
 	useEffect(() => {
@@ -39,7 +40,7 @@ const Detail = (category) => {
                         <div class="home-category-banner bg-light-orange">
                             <h5 class="title">Những mẫu giày {categoryName} hot nhất  dành cho thể thao</h5>
                           
-                            <a href="#" class="btn btn-outline-primary rounded-pill">Xem ngay</a>
+                            <a href={`http://localhost:3000/list?categoryId=${categoryId}`} class="btn btn-outline-primary rounded-pill">Xem ngay</a>
                             <img src="~/css/images/items/2.jpg" class="img-bg"/>
                         </div>
                     </div> 

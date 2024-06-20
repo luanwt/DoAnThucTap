@@ -48,7 +48,7 @@ const CtLogin = (role) => {
     GET_ALL(`users`).then((item) =>
       setUsers(item.data)
     );
-  }, [roleId]);
+  }, []);
   const handleKeyDown = (event) => {
     setIsCapsLockOn(event.getModifierState('CapsLock'));
   };
@@ -92,7 +92,8 @@ const CtLogin = (role) => {
         localStorage.setItem('cartItems', JSON.stringify(cartItems));
 
       }
-      let dasdas = JSON.parse(localStorage.getItem('cartItems')) || [];
+
+      var go = true
 
       const handleUpdateQuantity = async (productId, newQuantity, cartId) => {
         try {
@@ -115,48 +116,84 @@ const CtLogin = (role) => {
           console.error('Failed to update cart item quality:', error);
         }
       };
+
       for (const newItem of cartItemsResponse.data) {
         const existingItemIndex = existingCartItems.findIndex(item => item.productId === newItem.productId);
-
+        
         if (existingItemIndex !== -1) {
           // Update existing item
-
+          go = false
           existingCartItems[existingItemIndex].quality += newItem.quality; // Update quantity
 
-          handleUpdateQuantity(existingCartItems[existingItemIndex].productId, existingCartItems[existingItemIndex].quality, firstCartId)
+          await handleUpdateQuantity(existingCartItems[existingItemIndex].productId, existingCartItems[existingItemIndex].quality, firstCartId)
           // PUT_EDIT(`${firstCartId}/${newItem.id}`,existingCartItems)
           // Update other properties as needed (optional)
           // existingCartItems[existingItemIndex].otherProperty = newItem.otherProperty;
+          const cartItemsResponse2 = await GET_ALL(`cartItems/cart/${firstCartId}`);
+          localStorage.setItem('cartItems', JSON.stringify(cartItemsResponse2.data));
+          // localStorage.setItem('cartItems', JSON.stringify(cartItemsResponse.data));
+          console.log('Cart data successfully fetched and stored in localStorage.');
+        
         } else {
           // Add new item
           existingCartItems.push(newItem);
+       
         }
-
-
       }
+      const missingProducts = existingCartItems.filter(existingItem => {
+        // Check if existing item's productId is NOT found in cartItemsResponse
+        return !cartItemsResponse.data.some(newItem => newItem.productId === existingItem.productId);
+      });
       localStorage.setItem('cartItems', JSON.stringify(existingCartItems));
+      missingProducts.forEach(item => {
+            try {
+              const requestData = {
+                productId: item.productId,
+                name: item.name,
+                image: item.image,
+                price: item.price,
+                quality: item.quality,
+                size: item.size,
+                cart: {
+                  id: item.cart.id
+                }
+              };
+              console.log("requestdatadasdasdas: ", requestData)
+              POST_ADD(`cartItems`, requestData)
+            } catch (error) {
+              console.error('Failed to retrieve orders:', error);
+            }})
+     
+      
 
-      console.log(dasdas.length);
-      dasdas.forEach(item => {
-        try {
-          const requestData = {
-            productId: item.productId,
-            name: item.name,
-            image: item.image,
-            price: item.price,
-            quality: item.quality,
-            cart: {
-              id: item.cart.id
-            }
-          };
-          console.log("requestdatadasdasdas: ", requestData)
-          POST_ADD(`cartItems`, requestData)
-        } catch (error) {
-          console.error('Failed to retrieve orders:', error);
-        }
-      })
-      // localStorage.setItem('cartItems', JSON.stringify(cartItemsResponse.data));
-      console.log('Cart data successfully fetched and stored in localStorage.');
+      // if (go === true) {
+        
+      //   let dasdas = JSON.parse(localStorage.getItem('cartItems')) || [];
+      //   localStorage.setItem('cartItems', JSON.stringify(existingCartItems));
+      //   console.log(dasdas.length);
+      //   dasdas.forEach(item => {
+      //     try {
+      //       const requestData = {
+      //         productId: item.productId,
+      //         name: item.name,
+      //         image: item.image,
+      //         price: item.price,
+      //         quality: item.quality,
+      //         size: item.size,
+      //         cart: {
+      //           id: item.cart.id
+      //         }
+      //       };
+      //       console.log("requestdatadasdasdas: ", requestData)
+      //       POST_ADD(`cartItems`, requestData)
+      //     } catch (error) {
+      //       console.error('Failed to retrieve orders:', error);
+      //     }
+      //   })
+      //   // localStorage.setItem('cartItems', JSON.stringify(cartItemsResponse.data));
+      //   console.log('Cart data successfully fetched and stored in localStorage.');
+      //   window.location.href = "/home";
+      // }
       window.location.href = "/home";
     } catch (error) {
       console.error('Error fetching cart data:', error);
@@ -167,7 +204,7 @@ const CtLogin = (role) => {
 
   async function checkToken(response) {
     const token = await GET_ALL(`token`);
-    let a=1
+    let a = 1
     console.log(token.data);
     if (token.data.length == 0) {
       console.log("dang nulllll")
@@ -182,7 +219,7 @@ const CtLogin = (role) => {
         role: {
           id: 2
         },
-      }; PostUserandCart(newItem, response.id,response.picture.data.url)
+      }; PostUserandCart(newItem, response.id, response.picture.data.url)
     }
     else {
       token.data.forEach(token => {
@@ -196,12 +233,13 @@ const CtLogin = (role) => {
             phonenumber: '0765626651',
             image: response.picture.data.url
           };
+          getCartByUserId(token.user.id)
           localStorage.setItem('Account', JSON.stringify(newItem2));
-          a=2
+          a = 2
         }
-       
+
       });
-      if(a==1){
+      if (a == 1) {
         let newItem = {
           fullname: response.name,
           email: 'luancui281103@gmail.com',
@@ -218,7 +256,7 @@ const CtLogin = (role) => {
       }
     }
   }
-  async function PostUserandCart(newItem, tokenid,image) {
+  async function PostUserandCart(newItem, tokenid, image) {
     const response = await POST_ADD(`users`, newItem)
     const requestData2 = {
       user: {
@@ -263,8 +301,6 @@ const CtLogin = (role) => {
         localStorage.setItem("accessToken", response.accessToken);
         localStorage.setItem('Account1', 1);
         localStorage.setItem('Login', 1);
-
-        // window.location.href = "/home";
       }
       else {
         alert("Vui lòng đăng xuất tài khoản hiện tại!");
@@ -312,7 +348,7 @@ const CtLogin = (role) => {
 
   async function checkTokenGG(response) {
     const token = await GET_ALL(`token`);
-    let a=1
+    let a = 1
     if (token.data.length == 0) {
       console.log("dang nulllll")
       let newItem = {
@@ -326,46 +362,47 @@ const CtLogin = (role) => {
         role: {
           id: 2
         },
-      }; PostUserandCartGG(newItem, response.id,response.picture.toString())
+      }; PostUserandCartGG(newItem, response.id, response.picture.toString())
     }
     else {
       token.data.forEach(token => {
         if (token.token == response.id) {
           console.log("token da ton tai")
           let newItem2 = {
-            id: response.id,
+            id: token.user.id,
             name: response.name,
             email: response.email,
             address: '44/109 Tan Chan Hiep Q12 TP HCM',
             phonenumber: response.phone,
-            image: response.picture.toString()
+            image: response.picture.toString(),
           };
+          getCartByUserId(token.user.id)
           localStorage.setItem('Account', JSON.stringify(newItem2));
-          a=2
+          a = 2
         }
       }
-    );
-    if(a==1) {
-      let newItem = {
-        fullname: response.name,
-        email: response.email,
-        address: '44/109 Tan Chan Hiep Q12 TP HCM',
-        phone_number: response.phone,
-        password: "162426",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        role: {
-          id: 2
-        },
-      
-      };
-      console.log(newItem)
-      PostUserandCartGG(newItem, response.id,response.picture.toString())
+      );
+      if (a == 1) {
+        let newItem = {
+          fullname: response.name,
+          email: response.email,
+          address: '44/109 Tan Chan Hiep Q12 TP HCM',
+          phone_number: response.phone,
+          password: "162426",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          role: {
+            id: 2
+          },
 
-    }
+        };
+        console.log(newItem)
+        PostUserandCartGG(newItem, response.id, response.picture.toString())
+
+      }
     }
   }
-  async function PostUserandCartGG(newItem, tokenid,image) {
+  async function PostUserandCartGG(newItem, tokenid, image) {
     const response = await POST_ADD(`users`, newItem)
     const requestData2 = {
       user: {
@@ -377,7 +414,7 @@ const CtLogin = (role) => {
       id: response.data.id,
       name: response.data.fullname,
       email: response.data.email,
-      phone: response.data.phone,
+      phone: "0394582058",
       image: image
     };
     localStorage.setItem('Account', JSON.stringify(newItem2));
@@ -405,7 +442,7 @@ const CtLogin = (role) => {
           })
           .then((res) => {
             setProfile(res.data);
-      
+
 
             if (login != 1) {
               // let newItem = {
@@ -468,7 +505,7 @@ const CtLogin = (role) => {
       <section class="section-conten padding-y-10">
         <div class="card mx-auto" style={{ paddingLeft: 300, paddingRight: 300 }}>
           <div class="card-body">
-            <h3 class="card-title mb-4">Đăng nhập </h3>
+            <h2 class="card-title mb-4" style={{ paddingLeft: 500 }}>Đăng nhập </h2>
             <form class="formLogin" style={{ paddingLeft: 300 }}>
 
 
@@ -581,7 +618,7 @@ const CtLogin = (role) => {
                 Đăng ký ở đây
               </button>
             </label>
-            <button onClick={() => checkToken()}>checkToken</button>
+
           </div>
         </div>
 

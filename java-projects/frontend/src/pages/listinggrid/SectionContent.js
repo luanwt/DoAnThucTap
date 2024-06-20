@@ -54,13 +54,13 @@ const GridContent = () => {
 				setProducts(response.data);
 				setProducts2(response.data)
 				const contentRangeHeader = response.headers["content-range"];
-				const totalItemsString= contentRangeHeader.match(/\/(\d+)/);
+				const totalItemsString = contentRangeHeader.match(/\/(\d+)/);
 				const totalItems = parseInt(totalItemsString[1]);
 				const calculatedTotalPages = Math.ceil(totalItems / numItems);
 				setTotalPages(calculatedTotalPages);
 			}
 		);
-	
+
 		if (categoryId !== null) {
 			GET_ID(`categories`, categoryId).then((item) => setCategories(item.data));
 		} else {
@@ -68,39 +68,43 @@ const GridContent = () => {
 		}
 	}, [categoryId, currentPage]);
 
-	
+
 
 	const filterItem = () => {
 		// Get minimum price as a number (ensure valid input)
 		const minPrice = parseFloat(document.getElementById("min").value) || 0;
-	  
+
 		// Get optional maximum price as a number (handle potential errors)
 		let maxPrice;
 		try {
-		  maxPrice = parseFloat(document.getElementById("max").value) || null;
+			maxPrice = parseFloat(document.getElementById("max").value) || null;
 		} catch (error) {
-		  console.error("Invalid maximum price:", error);
-		  maxPrice = null; // Set to null if parsing fails
+			console.error("Invalid maximum price:", error);
+			maxPrice = null; // Set to null if parsing fails
 		}
-	  
+
 		// Filter products based on minimum and optional maximum price
 		const filteredProducts = products2.filter((product) => {
-		  if (maxPrice === null) {
-			// Only minimum price filter
-			return product.price > minPrice;
-		  } else {
-			// Minimum and maximum price filter
-			return product.price >= minPrice && product.price <= maxPrice;
-		  }
+			if (maxPrice === null) {
+				// Only minimum price filter
+				return product.price >= minPrice;
+			} else {
+				// Minimum and maximum price filter
+				return minPrice <=product.price   && product.price <= maxPrice;
+			}
 		});
-	  
+
 		// Display filtered products (console for debugging, update UI in your framework)
 		console.log(filteredProducts);
-	  
+
 		// Update UI with filtered products (framework-specific)
 		// Replace with your framework's mechanism to update product state/data
 		setProducts(filteredProducts);
-	  };
+	};
+	function formatPrice(priceInXu) {
+		const dong = priceInXu; // Assuming 1 dong = 100 xu
+		return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(dong);
+	}
 	return (
 
 		<section class="section-content padding-y">
@@ -168,7 +172,7 @@ const GridContent = () => {
 									<li class="list-inline-item mr-3">
 										<label class="custom-control mt-1 custom-checkbox">
 											<input type="checkbox" class="custom-control-input" />
-											<div class="custom-control-label">sẵn sàng để vận chuyển 
+											<div class="custom-control-label">sẵn sàng để vận chuyển
 											</div>
 										</label>
 									</li>
@@ -201,19 +205,19 @@ const GridContent = () => {
 						products.map((row) => (
 							<div class="col-md-3">
 								<figure class="card card-product-grid">
-									
+
 									<div class="img-wrap">
-										
-								
+
+
 										<Link to={`/detailproduct?productId=${row.id}`} class="img-wrap">
-									<img src={`./images/items/${row.image}`} />{" "}
-									<span class="badge badge-danger"> Mới </span>
-								</Link>
+											<img src={`./images/items/${row.image}`} />{" "}
+											<span class="badge badge-danger"> Mới </span>
+										</Link>
 									</div>
 									<figcaption class="info-wrap">
 										<h4 href="/" class="title mb-2">{row.name}</h4>
 										<div class="price-wrap">
-											<span class="price">{row.price} vnd</span>
+											<span class="price">{formatPrice(row.price)} vnd</span>
 											<small class="text-muted">/sản phẩm</small>
 										</div>
 
@@ -238,8 +242,8 @@ const GridContent = () => {
 							</div>
 						))}
 				</div>
-			<nav class="mb-4" aria-label="Page navigation sample">
-				<ul class="pagination">
+				<nav class="mb-4" aria-label="Page navigation sample">
+					<ul class="pagination">
 						<li class={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
 							<a class="page-link" onClick={handlePrevious}>
 								Previous

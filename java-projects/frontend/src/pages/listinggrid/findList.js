@@ -7,44 +7,49 @@ import { Alert } from "bootstrap";
 const FindList = () => {
 	const [searchedProducts, setSearchedProducts] = useState([]);
 	const [searchedProducts2, setSearchedProducts2] = useState([]);
-		useEffect(() => {
-			const storedProducts = JSON.parse(localStorage.getItem('searchedProducts') || '[]');
-			setSearchedProducts(storedProducts);
-			setSearchedProducts2(storedProducts)
-		}, []);
+	useEffect(() => {
+		const storedProducts = JSON.parse(localStorage.getItem('searchedProducts') || '[]');
+		setSearchedProducts(storedProducts);
+		setSearchedProducts2(storedProducts)
+	}, []);
 
 
-		const filterItem = () => {
-			// Get minimum price as a number (ensure valid input)
-			const minPrice = parseFloat(document.getElementById("min").value) || 0;
+	const filterItem = () => {
+		// Get minimum price as a number (ensure valid input)
+		const minPrice = parseFloat(document.getElementById("min").value) || 0;
 
-			// Get optional maximum price as a number (handle potential errors)
-			let maxPrice;
-			try {
-			  maxPrice = parseFloat(document.getElementById("max").value) || null;
-			} catch (error) {
-			  console.error("Invalid maximum price:", error);
-			  maxPrice = null; // Set to null if parsing fails
-			}
-		  
-			// Filter products based on minimum and optional maximum price
-			const filteredProducts = searchedProducts2.filter((product) => {
-			  if (maxPrice === null) {
+		// Get optional maximum price as a number (handle potential errors)
+		let maxPrice;
+		try {
+			maxPrice = parseFloat(document.getElementById("max").value) || null;
+		} catch (error) {
+			console.error("Invalid maximum price:", error);
+			maxPrice = null; // Set to null if parsing fails
+		}
+
+		// Filter products based on minimum and optional maximum price
+		const filteredProducts = searchedProducts2.filter((product) => {
+			if (maxPrice === null) {
 				// Only minimum price filter
-				return product.price > minPrice;
-			  } else {
+				return product.price >= minPrice;
+			} else {
 				// Minimum and maximum price filter
 				return product.price >= minPrice && product.price <= maxPrice;
-			  }
-			});
-		  
-			// Display filtered products (console for debugging, update UI in your framework)
-			console.log(filteredProducts);
-		  
-			// Update UI with filtered products (framework-specific)
-			// Replace with your framework's mechanism to update product state/data
-			setSearchedProducts(filteredProducts);
-		  };
+			}
+		});
+
+		// Display filtered products (console for debugging, update UI in your framework)
+		console.log(filteredProducts);
+
+		// Update UI with filtered products (framework-specific)
+		// Replace with your framework's mechanism to update product state/data
+		setSearchedProducts(filteredProducts);
+	};
+
+	function formatPrice(priceInXu) {
+		const dong = priceInXu; // Assuming 1 dong = 100 xu
+		return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(dong);
+	}
 	return (
 
 		<section class="section-content padding-y">
@@ -109,7 +114,7 @@ const FindList = () => {
 									<li class="list-inline-item mr-3">
 										<label class="custom-control mt-1 custom-checkbox">
 											<input type="checkbox" class="custom-control-input" />
-											<div class="custom-control-label">sẵn sàng để vận chuyển 
+											<div class="custom-control-label">sẵn sàng để vận chuyển
 											</div>
 										</label>
 									</li>
@@ -143,20 +148,20 @@ const FindList = () => {
 							<div class="col-md-3">
 								<figure class="card card-product-grid">
 									<div class="img-wrap">
-										
+
 										<span class="badge badge-danger"> Mới </span>
 										<Link to={`/detailproduct?productId=${row.id}`} class="img-wrap">
-									<img src={`./images/items/${row.image}`} />{" "}
-								</Link>
+											<img src={`./images/items/${row.image}`} />{" "}
+										</Link>
 									</div>
 									<figcaption class="info-wrap">
 										<h4 href="/" class="title mb-2">{row.name}</h4>
 										<div class="price-wrap">
-											<span class="price">{row.price} vnd</span>
+											<span class="price">{formatPrice(row.price)} vnd</span>
 											<small class="text-muted">/sản phẩm</small>
 										</div>
 
-										<p class="mb-2">số lượng: {row.quality}  <small class="text-muted"></small></p>
+										<p class="mb-2">số lượng: {row.quality} đôi <small class="text-muted"></small></p>
 										<p class="mb-3">
 											<span class="tag"> <i class="fa fa-check"></i> Đã xác minh</span>
 											<span class="tag"> 2 năm </span>
@@ -186,7 +191,7 @@ const FindList = () => {
 
 				<nav class="mb-4" aria-label="Page navigation sample">
 
-				{/* <ul class="pagination">
+					{/* <ul class="pagination">
 						<li class={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
 							<a class="page-link" onClick={handlePrevious}>
 								Previous

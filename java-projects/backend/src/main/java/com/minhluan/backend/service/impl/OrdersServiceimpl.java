@@ -4,7 +4,9 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.minhluan.backend.entity.CartItem;
 import com.minhluan.backend.entity.Orders;
+import com.minhluan.backend.repository.CartItemRepository;
 import com.minhluan.backend.repository.OrdersRepository;
 import com.minhluan.backend.service.OrdersService;
 
@@ -51,5 +53,11 @@ public class OrdersServiceimpl implements OrdersService  {
     public Orders deleteOrders(Long OrdersId) {
         OrdersRepository.deleteById(OrdersId);
         return null;
+    }
+
+
+     @Override
+    public List<Orders> getOrderssByuserId(Long userId) {
+        return OrdersRepository.findByUserId(userId);
     }
 }

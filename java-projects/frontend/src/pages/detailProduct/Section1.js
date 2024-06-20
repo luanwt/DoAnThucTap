@@ -9,7 +9,7 @@ import { CookiesProvider, useCookies } from "react-cookie";
 import Login from "../../Component/layouts/Login";
 import { error } from "jquery";
 import { Button } from "react-bootstrap";
-import { colors } from "@mui/material";
+import { Checkbox, colors, FormControlLabel } from "@mui/material";
 
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -33,6 +33,7 @@ const cardTextStyle = {
 // localStorage.setItem('cartItems',JSON.stringify([]));
 const Section1 = () => {
 	const [product, setProduct] = useState({});
+	const [selectedSize, setSelectedSize] = useState('S');
 	const [feedbacks, setfeedback] = useState([]);
 	const navigate = useNavigate(); // Hook to navigate programmatically
 	const location = useLocation();
@@ -63,7 +64,7 @@ const Section1 = () => {
 		if (cartItems != null) {
 			var bool = true;
 			cartItems.forEach(item => {
-				if (item.productId == product.id) {
+				if (item.productId == product.id && item.size==selectedSize) {
 					item.quality += u;
 					localStorage.setItem('cartItems', JSON.stringify(cartItems));
 					window.location.href = "/shopping-cart";
@@ -78,7 +79,7 @@ const Section1 = () => {
 					image: a,
 					quality: u,
 					cart: { id: null },
-
+					size:selectedSize
 				};
 				cartItems.push(newItem);
 				localStorage.setItem('cartItems', JSON.stringify(cartItems));
@@ -146,21 +147,15 @@ const Section1 = () => {
 			}
 
 
-			console.log('User Cart ID :', cartId);
-			console.log('Product ID :', product.id); // Log product ID
-
-
-			const existingCartItem = cartItems.find(cartItem => cartItem.productId === product.id);
+			
+			const existingCartItem = cartItems.find(cartItem => cartItem.productId === product.id && cartItem.size === selectedSize);
 
 			if (existingCartItem) {
-
+				console.log("Trung")
 				const existingIntQuality = parseInt(existingCartItem.quality, 10);
 				const inputIntValue = parseInt(inputValue, 10);
 				const sum = existingIntQuality + inputIntValue;
-
-
 				await handleUpdateQuantity(product.id, sum, cartId);
-
 			} else {
 				const cartItems = {
 					productId: product.id,
@@ -169,8 +164,7 @@ const Section1 = () => {
 					price: product.discount,
 					quality: inputValue,// Ensure to include quality
 					cart: { id: cartId },
-
-
+					size:selectedSize
 				};
 				console.log('cartItems:', cartItems);
 
@@ -194,15 +188,14 @@ const Section1 = () => {
 			setInputValue(1);
 			/////
 			let a = product.image
-			var x = document.getElementById("quality");
 			let u = parseInt(inputValue, 10);
 			if (cartItems != null) {
 				var bool = true;
 				cartItems.forEach(item => {
-					if (item.productId == product.id) {
+					if (item.productId == product.id && item.size ===selectedSize) {
 						item.quality += u;
 						localStorage.setItem('cartItems', JSON.stringify(cartItems));
-						// window.location.href = "/shopping-cart";
+						window.location.href = "/shopping-cart";
 						bool = false;
 					}
 				});
@@ -213,10 +206,11 @@ const Section1 = () => {
 						price: product.discount,
 						image: a,
 						quality: u,
+						size:selectedSize
 					};
 					cartItems.push(newItem);
 					localStorage.setItem('cartItems', JSON.stringify(cartItems));
-					// window.location.href = "/shopping-cart";
+					window.location.href = "/shopping-cart";
 				}
 			}
 			window.location.href = "/shopping-cart";
@@ -258,9 +252,9 @@ const Section1 = () => {
 	/////
 
 	function formatPrice(priceInXu) {
-        const dong = priceInXu; // Assuming 1 dong = 100 xu
-        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(dong);
-    }
+		const dong = priceInXu; // Assuming 1 dong = 100 xu
+		return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(dong);
+	}
 	return (
 		<section>
 			<section class="py-3 bg-light">
@@ -318,10 +312,10 @@ const Section1 = () => {
 								</div>
 								<div class="mb-3">
 									<h2 class="title mt-3" >Gia: {formatPrice(product.discount)}
-										
+
 									</h2>
 									<del style={{ fontSize: '1.6rem', color: '#e63b3b' }} class="text-muted">Gia goc: {formatPrice(product.price)}</del>
-									
+
 								</div>
 								<p>
 									{" "}
@@ -342,10 +336,33 @@ const Section1 = () => {
 										<span className="out-of-stock">Hết hàng</span>
 									)}</dd>
 									<dt class="col-sm-3">Thời gian giao hàng</dt>
+
 									<dd class="col-sm-9">3-4 tuần</dd>
+
 									<Button class="nav-link" style={{ background: "red", maxWidth: 120, borderRadius: 80 }} onClick={addtocart2}>
 										<span class="text">Thêm vào Yeu thich</span> </Button>
 								</dl>
+								<div>
+									<h2>Chọn size sản phẩm</h2>
+									<div className="d-flex flex-wrap"> {/* Add Bootstrap classes for layout */}
+										{['S', 'M', 'L', 'XL'].map((size) => (
+											<FormControlLabel
+												key={size}
+												control={
+													<Checkbox
+														type="checkbox"
+														checked={selectedSize === size}
+														value={size}
+														onChange={() => setSelectedSize(size)}
+														className="ms-2" // Apply Bootstrap margin-left for 20px spacing
+													/>
+												}
+												label={size}
+											/>
+										))}
+									</div>
+									<p>Size đã chọn: {selectedSize}</p>
+								</div>
 								<div class="form-row mt-4">
 									<div class="form-group col-md flex-grow-0">
 										<div class="input-group mb-3 input-spinner">
@@ -356,7 +373,7 @@ const Section1 = () => {
 													<div class="form-inline" >
 														<label class="mr-2">So luong</label>
 
-														<input  style={{ width: "fit-content", fontSize: '1.3rem', color: '#e63b3b' }} value={inputValue} type="number" id="quality" onChange={handleInputChange}></input>
+														<input style={{ width: "fit-content", fontSize: '1.3rem', color: '#e63b3b' }} value={inputValue} type="number" id="quality" onChange={handleInputChange}></input>
 
 
 													</div>
@@ -383,31 +400,32 @@ const Section1 = () => {
 								<h4 class="title mt-3" style={{ color: "red" }}>Tổng cộng : {formatPrice(product.discount * handleClick())}</h4>
 							</article>
 						</main>
-						<div class="comments" style={{ border: "2px solid ",width: "600px"}}>
-							<h2>Đánh giá</h2>
+						<div class="col">
+						<h2>Đánh giá</h2>
+						<div class="comments" style={{ border: "2px solid ", width: "600px" }}>
 							<ul class="comments-list"  >
 								{filteredFeedBack.length > 0 && (
 									<>
 										{filteredFeedBack.map((row) => (
-									
-										<li class="comment" key={row.id} style={{paddingTop: 10}}>
-										<div class="comment-header">
 
-											<div class="comment-info">
-												<span class="comment-author">{row.fullname} </span>
-												<span class="comment-date">{row.created_at}</span>
-											</div>
-										</div>
-										<div class="comment-content">
-											{row.content}
-										</div>
-											
-									</li>
+											<li class="comment" key={row.id} style={{ paddingTop: 10 }}>
+												<div class="comment-header">
+
+													<div class="comment-info">
+														<span class="comment-author">{row.fullname} </span>
+														<span class="comment-date">{row.created_at}</span>
+													</div>
+												</div>
+												<div class="comment-content">
+													{row.content}
+												</div>
+
+											</li>
 
 										))}
 									</>
 								)}
-								<div class="comment-add" style={{paddingTop: 20}}>
+								<div class="comment-add" style={{ paddingTop: 20 }}>
 
 									<div class="comment-input">
 										<textarea name="comment" id="feedbacks" placeholder="Viết bình luận của bạn..."></textarea>
@@ -419,6 +437,8 @@ const Section1 = () => {
 								</div>
 							</ul>
 						</div>
+						</div>
+						
 					</div>
 				</div>
 			</section>

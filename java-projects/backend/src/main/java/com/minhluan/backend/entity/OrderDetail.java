@@ -19,6 +19,7 @@ public class OrderDetail {
     private  int price;
     private int num;
     private int total_money;
+    private String size;
 
     @ManyToOne
     private Product product;

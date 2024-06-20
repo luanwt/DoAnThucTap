@@ -1,10 +1,10 @@
 
 import { Link } from "react-router-dom";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { Button } from "react-bootstrap";
 import axios from "axios";
-import { DELETE_ID, GET_ID, PUT_EDIT } from "../../api/apiService";
+import { DELETE_ID, GET_ALL, GET_ID, PUT_EDIT } from "../../api/apiService";
 
 // const storedUserInfo = localStorage.getItem('Account');
 // const retrievedUserInfo = JSON.parse(storedUserInfo);
@@ -18,7 +18,7 @@ const CTShoppingC = () => {
 	// const [fullname, setfullname] = useState("");
 	// const [address, setaddress] = useState("");
 	// const [phone_number, setphone_number] = useState("");
-
+	const [cartdb, setcartdb] = useState([]);
 	const [totalPrice, settotalprice] = useState(0);
 	let login = localStorage.getItem('Login')
 	const [note, setnote] = useState("không giảm giá");
@@ -38,10 +38,12 @@ const CTShoppingC = () => {
 
 	//Xuli TotalPrice//
 	let tam = 0
-	function UpdateTotalPrice(a) {
+	async function UpdateTotalPrice(a) {
 		tam += a;
 		settotalprice(tam)
 	}
+	
+	let cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
 	//Update Orders
 	async function updateOrder(requestData) {
 		const response = await axios.post('http://localhost:8080/api/orders', requestData);
@@ -51,69 +53,81 @@ const CTShoppingC = () => {
 
 		try {
 			await updateOrder(requestData);
-			alert('Đơn hàng 1 đã cập nhật thành công!');
-			await updateOrderdetail();
-			alert('chi tiet Đơn hàng đã cập nhật thành công!');
+			// alert('Đơn hàng 1 đã cập nhật thành công!');
+			await updateOrderDetail();
+			// alert('chi tiet Đơn hàng đã cập nhật thành công!');
 		} catch (error) {
 			console.error('Yêu cầu thất bại:', error);
 		}
+		localStorage.removeItem('cartItems');
 		alert('Đã thanh toán thành công');
+		
 		window.location.href = "/shopping-cart";
 
 	}
-	//updateOrderDetail when buy all Item
-	let cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-	async function updateOrderdetail() {
-		const response = await axios.get('http://localhost:8080/api/orders');
-		if (cartItems != null) {
-			cartItems.forEach(item => {
-				var a
-				var b
-				try {
-					a = (response.data);
-					b = parseInt(a[a.length - 1].id)
-					const requestData = {
-						num: item.quality,
-						price: item.price,
-						total_money: item.price * item.quality,
-						order: {
-							id: b
-						},
-						product: {
-							id: item.productId,
-						},
-					};
-					console.log(requestData)
 
-					updateOrderdetail2(requestData)
-				} catch (error) {
-					console.error('Failed to retrieve orders:', error);
-				}
-			})
-		} else {
-			alert("Cartitem dang null???")
+
+	//updateOrderDetail when buy all Item
+
+	async function updateProduct(requestData) {
+		try {
+		  const productId = requestData.product.id;
+		  const response = await axios.get(`http://localhost:8080/api/products/${productId}`);
+		  const currentQuality = response.data.quality;
+		  console.log("quality in db now:", currentQuality)
+		  const newQuality = currentQuality - requestData.num;
+		  const updateResponse = await axios.put(`http://localhost:8080/api/products/update/${productId}`, { quality: newQuality });
+		  console.log("updateProduct quality success:", updateResponse.data); // Log updated quality
+		  delcartItems2()
+		} catch (error) {
+		  console.error('Failed to update product:', error);
+		  // Handle errors appropriately, e.g., display an error message to the user
 		}
-	}
+	  }
+	  async function updateOrderDetail() {
+		try {
+		  const response = await axios.get('http://localhost:8080/api/orders');
+		  const orderId = response.data[response.data.length - 1].id; // Assuming latest order ID
+		  if (cartItems !== null) {
+			for (const item of cartItems) {
+			  const requestData = {
+				num: item.quality,
+				price: item.price,
+				total_money: item.price * item.quality,
+				size: item.size,
+				order: { id: orderId },
+				product: { id: item.productId },
+			  };
+			  console.log(requestData); // Log request data for debugging
+			  await updateOrderdetail2(requestData); // Wait for updateOrderdetail2 to complete
+			  await updateProduct(requestData); // Call updateProduct after successful order detail update
+			}
+		  } else {
+			console.warn("cartItems is null"); // Warn about missing cart items
+		  }
+		} catch (error) {
+		  console.error('Failed to retrieve orders:', error);
+		  // Handle errors appropriately
+		}
+	  }
+
 	async function updateOrderdetail2(requestData) {
-		const productId = requestData.product.id;
 		// Assuming GET_ID returns a Promise
-		const response2 = await axios.get(`http://localhost:8080/api/products/${productId}`);
-		const num = response2.data.quality - requestData.num
-		PUT_EDIT(`products/update/${requestData.product.id}`, { quality: num })
-		delcartItems2(productId)
 		const response = await axios.post('http://localhost:8080/api/orderdetails', requestData);
 		console.log('Yêu cầu thành công:', response.data);
 	}
 	///
-
-
-	function delcartItems2(productId) {
-		DELETE_ID(`cartItems/${cartId}/${productId}`)
+	function delcartItems2() {
+		DELETE_ID(`cartItems/cart/${cartId}`)
 		localStorage.removeItem('cartItems');
-		window.location.href = "/shopping-cart";
+		// window.location.href = "/shopping-cart";
 	}
-
-
+	useEffect(() => {
+		if(login!=0){
+			GET_ALL(`cartItems/cart/${cartId}`).then((item) => setcartdb(item.data));
+		}
+		
+	}, []);
 	/////////////////////////////////////////////////
 	//In ra cac san pham tron Cart
 	function displayCartItems() {
@@ -128,25 +142,32 @@ const CTShoppingC = () => {
 				let buttonBuy = document.createElement('button');
 				buttonBuy.textContent = "Thanh Toan"
 				buttonBuy.style = "background-color: #FF6600; color: white; height: 40px";
-				buttonBuy.style.marginLeft="20px"
-				buttonBuy.style.marginTop="120px"
-				buttonBuy.style.border="none"
-				buttonBuy.style.borderRadius="5px"
+				buttonBuy.style.marginLeft = "20px"
+				buttonBuy.style.marginTop = "120px"
+				buttonBuy.style.border = "none"
+				buttonBuy.style.borderRadius = "5px"
 
 				let buttondel = document.createElement('button');
 				buttondel.textContent = "Xoa khoi gio hang"
 				buttondel.style = "background-color: #FF6600; color: white; height: 40px";
-				buttondel.style.marginLeft="10px"
-				buttondel.style.marginTop="120px"
-				buttondel.style.border="none"
-				buttondel.style.borderRadius="5px"
+				buttondel.style.marginLeft = "10px"
+				buttondel.style.marginTop = "120px"
+				buttondel.style.border = "none"
+				buttondel.style.borderRadius = "5px"
 				var d = item.productId
+				var e = item.size
 				buttondel.onclick = delcartItems
 				buttonBuy.onclick = buyOneItem
 				function delcartItems() {
+					// DELETE_ID(`cartItems/${cartId}/${item.productId}`)
 
-					DELETE_ID(`cartItems/${cartId}/${item.productId}`)
-					let temp = cartItems.filter(item => item.productId !== d);
+			
+					if(login==1){
+						let temp1 = cartdb.filter(item => item.productId === d && item.size === e);
+						DELETE_ID(`cartItems/${temp1[0].id}`)
+					}
+					let temp = cartItems.filter(item => item.productId !== d || item.size !== e);
+					console.log(temp)
 					localStorage.setItem("cartItems", JSON.stringify(temp))
 					window.location.href = "/shopping-cart";
 				}
@@ -181,13 +202,19 @@ const CTShoppingC = () => {
 							console.error('Yêu cầu thất bại:', error);
 						}
 
-						const temp = cartItems.filter(item => item.productId !== d);
-						localStorage.setItem("cartItems", JSON.stringify(temp));
+						// const temp = cartItems.filter(item => item.productId !== d);
+						// localStorage.setItem("cartItems", JSON.stringify(temp));
 						alert('Đã thanh toán thành công');
 					}
 				}
 
+				// function delcartItems1() {
 
+				// 	DELETE_ID(`cartItems/${cartId}/${item.productId}`)
+				// 	let temp = cartItems.filter(item => item.productId !== d);
+				// 	localStorage.setItem("cartItems", JSON.stringify(temp))
+				// 	window.location.href = "/shopping-cart";
+				// }
 
 
 				//Update Order when buy 1 Item
@@ -206,11 +233,12 @@ const CTShoppingC = () => {
 						const response = await axios.get('http://localhost:8080/api/orders');
 						a = (response.data);
 						b = parseInt(a[a.length - 1].id)
-						alert(item.productId)
+
 						const requestData = {
 							num: item.quality,
 							price: item.price,
 							total_money: item.price * item.quality,
+							size: item.size,
 							order: {
 								id: b
 							},
@@ -237,60 +265,61 @@ const CTShoppingC = () => {
 				}
 
 				////////
-			
-				
+
+
 				let itemDiv = document.createElement('h4');
 				itemDiv.style.color = '#FF0000';
 				itemDiv.textContent = `${item.name} `;
 				let price = document.createElement('h6');
-				price.style.paddingLeft="20px"
-				price.style.marginTop="120px"
-				let price2 = item.quality * item.price 
+				price.style.paddingLeft = "20px"
+				price.style.marginTop = "120px"
+				let price2 = item.quality * item.price
 				// totalPrice+=item.quality*item.price;
 				UpdateTotalPrice(item.quality * item.price)
 
-				price.textContent = `Tong cong: ${formatPrice(price2/1000)}`;
+				price.textContent = `Tong cong: ${formatPrice(price2 )}`;
 				const image = document.createElement("img");
 				let itemDiv1 = document.createElement('div');
-		
-		
+
+
 				itemDiv1.textContent = `So luong: ${item.quality} `;
 				image.height = 240
 				image.width = 240
 				image.addEventListener('click', () => {
 					window.location.href = `/detailproduct?productId=${item.productId}`;
 				});
-				itemDiv1.style.marginLeft="20px"
-				itemDiv1.style.marginTop="120px"
+				itemDiv1.style.marginLeft = "20px"
+				itemDiv1.style.marginTop = "120px"
 				let a = item.image
 				image.src = `./images/items/${a}`;
-		
+
 
 				const itemDetails = document.createElement('div');
-				itemDetails.style.display="flex"
-					
-						
-			
-			
+				itemDetails.style.display = "flex"
+
+				let size = document.createElement('div');
+				size.textContent = `Size:${item.size}`
+				size.style.paddingLeft = "20px"
+				size.style.marginTop = "120px"
+
 				itemDetails.appendChild(itemDiv);
 				itemDetails.appendChild(image);
-		
-				cartContainer.appendChild(itemDetails);
-			
+
 				itemDetails.appendChild(itemDiv1);
+				itemDetails.appendChild(size);
 				itemDetails.appendChild(price);
 				itemDetails.appendChild(buttonBuy);
 				itemDetails.appendChild(buttondel);
-		
-			
+				cartContainer.appendChild(itemDetails);
+
 			});
 		}
 	}
 
 	function formatPrice(priceInXu) {
-        const dong = priceInXu * 1000; // Assuming 1 dong = 100 xu
-        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(dong);
-    }
+		const dong = priceInXu ; // Assuming 1 dong = 100 xu
+		return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(dong);
+	}
 	return (
 		<>
 			<section class="section-content padding-y">
@@ -304,11 +333,11 @@ const CTShoppingC = () => {
 										{/* {setTimeout(() => {
 											displayCartItems();
 										}, 100)} */}
-										
-											
-											
-											
-										
+
+
+
+
+
 										{/* {window.onload = displayCartItems} */}
 									</div>
 								</div>
@@ -317,16 +346,16 @@ const CTShoppingC = () => {
 
 									</thead>
 									<tbody >
-									
+
 										<div >
-											<div id="cart"  className="row-md-4">
-											{cartItems.length > 0 ? window.onload = displayCartItems : (
-													<h4 style={{color:"#FF6666"}}>GIỎ HÀNG HIỆN TẠI ĐANG TRỐNG</h4>
+											<div id="cart" className="row-md-4">
+												{cartItems.length > 0 ? window.onload = displayCartItems : (
+													<h4 style={{ color: "#FF6666" }}>GIỎ HÀNG HIỆN TẠI ĐANG TRỐNG</h4>
 												)}
 											</div>
-											</div>
-										
-								
+										</div>
+
+
 									</tbody>
 								</table>
 
@@ -359,9 +388,10 @@ const CTShoppingC = () => {
 																alert("Sử dụng mã giảm giá thành công")
 																setnote("có giảm giá")
 																y.value = 100000;
-																y.textContent =formatPrice(y.value/1000) 
-																z.value = (totalPrice - y.value)/1000;
+																y.textContent = formatPrice(y.value )
+																z.value = (totalPrice - y.value) ;
 																z.textContent = formatPrice(z.value)
+																settotalprice(z.value)
 															}
 														}}>Xác Nhận
 													</Button>
@@ -376,7 +406,7 @@ const CTShoppingC = () => {
 								<div class="card-body">
 									<dl class="dlist-align">
 										<dt>Total price:</dt>
-										<dd class="text-right"> {formatPrice(totalPrice/1000)} </dd>
+										<dd class="text-right"> {formatPrice(totalPrice )} </dd>
 									</dl>
 
 									<dl class="dlist-align">
@@ -385,7 +415,7 @@ const CTShoppingC = () => {
 									</dl>
 									<dl class="dlist-align">
 										<dt>Total:</dt>
-										<dd class="text-right  h5" id="total" ><strong>{formatPrice(totalPrice/1000)}</strong></dd>
+										<dd class="text-right  h5" id="total" ><strong>{formatPrice(totalPrice )}</strong></dd>
 									</dl>
 									<dl>
 										<Button class="dlist-align" onClick={() => {
@@ -414,9 +444,9 @@ const CTShoppingC = () => {
 															id: retrievedUserInfo.id,
 														}
 													};
-													DELETE_ID(`cart/${cartId}`)
+											
 													updateall(requestData)
-													localStorage.removeItem('cartItems');
+												
 
 												}
 												else {

@@ -1,9 +1,22 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { GET_ALL } from "../../api/apiService";
 const CTOrderP = () => {
 	// const  storedUserInfo  = localStorage.getItem('orders');
 	// const  retrievedUserInfo = JSON.parse(storedUserInfo);
+
+	// const [orders, setorders] = useState({});
+	
+    // const storedUserInfo = localStorage.getItem('Account');
+    // const storedUserInfo1 = localStorage.getItem('Account1');
+
+    // const retrievedUserInfo = JSON.parse(storedUserInfo);
+
+	// useEffect(() => {	
+	// 	GET_ALL(`orders/user/${retrievedUserInfo.id}`).then((item) => setorders(item.data));
+	// }, []);
+
 	return(
 <>
 <main class="col-md-9">
@@ -16,8 +29,7 @@ const CTOrderP = () => {
 				<div class="col-md-8">
 					<h6 class="text-muted">Vận chuyển đến</h6>
 					<p>Trần Minh Luân<br></br>  
-					Điện thoại:0394582058 Email: luancui281103
-					@gmail.com <br></br>
+					Điện thoại:0394582058 Email: luancui281103@gmail.com <br></br>
 			    	Địa điểm: 44/109 Tân Chánh Hiệp Q12,TP Hồ Chí Minh. <br></br> 
 			 		</p>
 				</div>
